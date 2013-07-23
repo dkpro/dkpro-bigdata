@@ -231,6 +231,9 @@ public class DkproMapper
                 reporter.incrCounter("uima", "map event " + event.getType(), 1);
             }
             final Text outkey = getOutputKey(key, aCAS);
+            value.setCAS(aCAS);
+            reporter.incrCounter("uima", "overall doc size", value.getCAS().getDocumentText()
+                    .length());
             output.collect(outkey, value);
         }
         catch (final AnalysisEngineProcessException e) {
@@ -251,16 +254,24 @@ public class DkproMapper
     {
 
         FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job), dest, true, this.job);
-        final FileStatus[] content = this.localFS.listStatus(results_dir
-                .makeQualified(this.localFS));
-        for (final FileStatus fileStatus : content) {
-            if (fileStatus.isDir()) {
-                copyRecursively(fileStatus.getPath(), dest.suffix(fileStatus.getPath().getName()));
+
+        try {
+            final FileStatus[] content = this.localFS.listStatus(results_dir
+                    .makeQualified(this.localFS));
+            for (final FileStatus fileStatus : content) {
+                if (fileStatus.isDir()) {
+                    copyRecursively(fileStatus.getPath(),
+                            dest.suffix(fileStatus.getPath().getName()));
+                }
+                else {
+                    FileUtil.copy(this.localFS, fileStatus.getPath(), FileSystem.get(this.job),
+                            dest.suffix(fileStatus.getPath().getName()), true, this.job);
+                }
             }
-            else {
-                FileUtil.copy(this.localFS, fileStatus.getPath(), FileSystem.get(this.job),
-                        dest.suffix(fileStatus.getPath().getName()), true, this.job);
-            }
+        }
+        catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     };
 

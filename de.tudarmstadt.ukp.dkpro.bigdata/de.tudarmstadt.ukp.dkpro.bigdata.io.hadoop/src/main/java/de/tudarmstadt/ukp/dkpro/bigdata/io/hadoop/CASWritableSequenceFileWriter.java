@@ -21,13 +21,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
@@ -83,21 +82,26 @@ public class CASWritableSequenceFileWriter
         throws org.apache.uima.resource.ResourceInitializationException
     {
         super.initialize(context);
-        final JobConf conf = new JobConf();
+        final Configuration conf = new Configuration(false);
+
         this.path = new File((String) context.getConfigParameterValue(PARAM_PATH));
         conf.set("fs.default.name", this.fileSystemName);
         // Compress Map output
         if (this.compress) {
             System.out.println("compressing");
-            conf.set("mapred.compress.map.output", "true");
+            conf.set("mapred.output.compress", "true");
+
             conf.set("mapred.map.output.compression.codec",
                     "org.apache.hadoop.io.compress.SnappyCodec");
         }
-        // Compress MapReduce output
-        conf.set("mapred.output.compress", "true");
-        conf.set("mapred.output.compression", "org.apache.hadoop.io.compress.SnappyCodec");
-        FileOutputFormat.setCompressOutput(conf, true);
-        // FileOutputFormat.setOutputCompressorClass(conf, SnappyCodec.class);
+        else
+            conf.set("mapred.output.compress", "false");
+
+        // conf.set("mapred.compress.map.output", "true");
+        //
+        // // Compress MapReduce output
+        // conf.set("mapred.output.compression", "org.apache.hadoop.io.compress.SnappyCodec");
+        // // FileOutputFormat.setOutputCompressorClass(conf, SnappyCodec.class);
 
         final String filename = this.path + "/" + "part-00000";
         try {

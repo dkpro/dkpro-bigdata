@@ -66,7 +66,7 @@ public class CollocMapper
 
     public enum Count
     {
-        NGRAM_TOTAL, OVERFLOW, MULTIWORD, EMITTED_UNIGRAM, SENTENCES
+        NGRAM_TOTAL, OVERFLOW, MULTIWORD, EMITTED_UNIGRAM, SENTENCES, LEMMA, DOCSIZE
     }
 
     private static final Logger log = LoggerFactory.getLogger(CollocMapper.class);
@@ -138,12 +138,33 @@ public class CollocMapper
             // XCASDeserializer.deserialize(new StringInputStream(xml), aCAS);
 
             final JCas jcas = value.getCAS().getJCas();
+
             int lemmaCount = jcas.getAnnotationIndex(Lemma.type).size();
+            context.getCounter(Count.LEMMA).increment(lemmaCount);
+            context.getCounter(Count.DOCSIZE).increment(jcas.getDocumentText().length());
             OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
             OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
             int sentenceCount = 0;
             int count = 0;
-            // count += collectCooccurencesFromCas(context, jcas, ngrams, unigrams);
+            count += collectCooccurencesFromCas(context, jcas, ngrams, unigrams);
+            if (count > 10000) {
+                flushCollocations(context, ngrams, unigrams);
+                // I suspect the clear method is not working properly
+                ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
+                unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
+                context.getCounter(Count.SENTENCES).increment(sentenceCount);
+                context.getCounter(Count.NGRAM_TOTAL).increment(count);
+                count = 0;
+                sentenceCount = 0;
+            }
+            // Annotation[] previous = new Annotation[window];
+            // for (final Annotation sentence : select(jcas, Sentence.class)) {
+            // for (int j = 0; j < previous.length - 1; j++)
+            // previous[j] = previous[j + 1];
+            // previous[previous.length - 1] = sentence;
+            // sentenceCount++;
+            // count += collectCooccurencesFromCoveringAnnotation(context, jcas, sentence, ngrams,
+            // unigrams);
             // if (count > 10000) {
             // flushCollocations(context, ngrams, unigrams);
             // // I suspect the clear method is not working properly
@@ -154,25 +175,7 @@ public class CollocMapper
             // count = 0;
             // sentenceCount = 0;
             // }
-            Annotation[] previous = new Annotation[window];
-            for (final Annotation sentence : select(jcas, Sentence.class)) {
-                for (int j = 0; j < previous.length - 1; j++)
-                    previous[j] = previous[j + 1];
-                previous[previous.length - 1] = sentence;
-                sentenceCount++;
-                count += collectCooccurencesFromCoveringAnnotation(context, jcas, sentence, ngrams,
-                        unigrams);
-                if (count > 10000) {
-                    flushCollocations(context, ngrams, unigrams);
-                    // I suspect the clear method is not working properly
-                    ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
-                    unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
-                    context.getCounter(Count.SENTENCES).increment(sentenceCount);
-                    context.getCounter(Count.NGRAM_TOTAL).increment(count);
-                    count = 0;
-                    sentenceCount = 0;
-                }
-            }
+            // }
             flushCollocations(context, ngrams, unigrams);
             context.getCounter(Count.NGRAM_TOTAL).increment(count);
 

@@ -220,7 +220,7 @@ public final class CollocDriver
         con.setInt("mapred.task.timeout", 6000000);
         con.setInt("io.sort.factor", 50);
         con.setInt("io.sort.mb", 500);
-
+        con.setInt("mapreduce.map.tasks", 256);
         Job job = new Job(con);
         job.setJobName(CollocDriver.class.getSimpleName() + ".generateCollocations:" + input);
         job.setJarByClass(CollocDriver.class);

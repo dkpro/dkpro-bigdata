@@ -27,7 +27,6 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -116,6 +115,7 @@ public abstract class DkproHadoopDriver
      * 
      * @param job
      */
+    @Override
     public abstract void configure(JobConf job);
 
     /*
@@ -134,7 +134,7 @@ public abstract class DkproHadoopDriver
         }
         this.job = new JobConf(getConf(), DkproHadoopDriver.class);
         final FileSystem fs = FileSystem.get(this.job);
-
+        Class.forName("de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable");
         // set the factory class name
         this.job.set("dkpro.uima.factory", getEngineFactoryClass().getName());
 
@@ -142,19 +142,20 @@ public abstract class DkproHadoopDriver
         final Path outputPath = new Path(args[1]);// output
         final CollectionReader reader = buildCollectionReader();
         // if a collection reader was defined, import data into hdfs
-        try {
-            final Class<?> c = Class.forName("org.apache.hadoop.io.compress.SnappyCodec");
-            FileOutputFormat.setOutputCompressorClass(this.job,
-                    (Class<? extends CompressionCodec>) c);
-        }
-        catch (final Exception e) {
-
-        }
+        // try {
+        // final Class<?> c = Class.forName("org.apache.hadoop.io.compress.SnappyCodec");
+        // FileOutputFormat.setOutputCompressorClass(this.job,
+        // (Class<? extends CompressionCodec>) c);
+        // }
+        // catch (final Exception e) {
+        //
+        // }
         if (reader != null) {
             final AnalysisEngine xcasWriter = AnalysisEngineFactory.createPrimitive(
                     CASWritableSequenceFileWriter.class, createTypeSystemDescription(),
                     CASWritableSequenceFileWriter.PARAM_PATH, inputPath.toString(),
-                    CASWritableSequenceFileWriter.PARAM_COMPRESS, true);
+                    CASWritableSequenceFileWriter.PARAM_COMPRESS, true,
+                    CASWritableSequenceFileWriter.PARAM_FS, job.get(("fs.default.name"), "file:/"));
             runPipeline(reader, xcasWriter);
         }
         // cleanup previous output

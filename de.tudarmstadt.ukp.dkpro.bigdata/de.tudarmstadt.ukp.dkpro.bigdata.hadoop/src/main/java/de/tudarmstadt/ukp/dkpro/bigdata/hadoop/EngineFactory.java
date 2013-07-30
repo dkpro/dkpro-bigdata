@@ -17,6 +17,7 @@
 package de.tudarmstadt.ukp.dkpro.bigdata.hadoop;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.resource.ResourceInitializationException;
 
@@ -47,5 +48,5 @@ public interface EngineFactory
     public AnalysisEngineDescription buildReducerEngine(Configuration job)
         throws ResourceInitializationException;
 
-    public void configure(Configuration job);
+    public void configure(JobConf job);
 }

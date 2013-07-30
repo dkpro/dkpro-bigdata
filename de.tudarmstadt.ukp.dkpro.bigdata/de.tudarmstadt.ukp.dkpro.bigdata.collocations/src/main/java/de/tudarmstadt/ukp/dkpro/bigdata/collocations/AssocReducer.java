@@ -58,6 +58,9 @@ public class AssocReducer
     private boolean emitUnigrams;
     private AssocCallback assocCalculator;
     private final AssocCallback llrCalculator = new ConcreteLLCallback();
+    private final AssocCallback pmiCalculator = new PMICallback();
+    private final AssocCallback chiCalculator = new ChiSquareCallback();
+    private final AssocCallback diceCalculator = new DiceCallback();
 
     private MultipleOutputs mos;
 
@@ -140,15 +143,22 @@ public class AssocReducer
                     new Object[] { ngram, gram[0], gramFreq[0], gram[1], gramFreq[1] }, ex);
             return;
         }
-        if (value < 5) {
+        if (value < minValue) {
             context.getCounter(Skipped.LESS_THAN_MIN_VALUE).increment(1);
         }
         else {
 
             context.getCounter("assoc", "EMITTED NGRAM").increment(1);
             mos.write("llr", new Text(ngram.getString()), new DoubleWritable(value));
-            mos.write("contingency", new Text(ngram.getString()), new Text("" + k11 + "\t" + k12
-                    + "\t" + k21 + "\t" + k22));
+            mos.write("pmi", new Text(ngram.getString()),
+                    new DoubleWritable(pmiCalculator.assoc(k11, k12, k21, k22)));
+            mos.write("chi", new Text(ngram.getString()),
+                    new DoubleWritable(chiCalculator.assoc(k11, k12, k21, k22)));
+            mos.write("dice", new Text(ngram.getString()),
+                    new DoubleWritable(diceCalculator.assoc(k11, k12, k21, k22)));
+
+            // mos.write("contingency", new Text(ngram.getString()), new Text("" + k11 + "\t" + k12
+            // + "\t" + k21 + "\t" + k22));
 
         }
     }

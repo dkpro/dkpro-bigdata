@@ -66,7 +66,7 @@ public class CollocMapper
 
     public enum Count
     {
-        NGRAM_TOTAL, OVERFLOW, MULTIWORD, EMITTED_UNIGRAM, SENTENCES, LEMMA, DOCSIZE
+        NGRAM_TOTAL, OVERFLOW, MULTIWORD, EMITTED_UNIGRAM, SENTENCES, LEMMA, DOCSIZE, EMPTYDOC
     }
 
     private static final Logger log = LoggerFactory.getLogger(CollocMapper.class);
@@ -141,6 +141,7 @@ public class CollocMapper
 
             int lemmaCount = jcas.getAnnotationIndex(Lemma.type).size();
             context.getCounter(Count.LEMMA).increment(lemmaCount);
+
             context.getCounter(Count.DOCSIZE).increment(jcas.getDocumentText().length());
             OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
             OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
@@ -180,7 +181,9 @@ public class CollocMapper
             context.getCounter(Count.NGRAM_TOTAL).increment(count);
 
         }
-
+        catch (NullPointerException e1) {
+            context.getCounter(Count.EMPTYDOC).increment(1);
+        }
         catch (CASException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();

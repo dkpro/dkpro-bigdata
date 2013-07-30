@@ -1,3 +1,5 @@
 /.settings
 /target
 /.classpath
+/testinput
+/nohup.out

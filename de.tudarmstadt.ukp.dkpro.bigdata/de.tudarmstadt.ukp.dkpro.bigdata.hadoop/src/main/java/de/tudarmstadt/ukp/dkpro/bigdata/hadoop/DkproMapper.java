@@ -73,7 +73,9 @@ public class DkproMapper
         }
         catch (final AnalysisEngineProcessException e) {
             reporter.incrCounter("uima", e.toString(), 1);
-            e.printStackTrace();
+            if (failures++ > maxFailures)
+                throw new IOException(e);
+
         }
     }
 

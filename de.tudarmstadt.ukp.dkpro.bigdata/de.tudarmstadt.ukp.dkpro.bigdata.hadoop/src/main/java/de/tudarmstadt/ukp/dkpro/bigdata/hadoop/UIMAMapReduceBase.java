@@ -56,6 +56,8 @@ public class UIMAMapReduceBase
     private Path results_dir;
     private JobConf job;
     private Map<String, URL> resourceURIs;
+    protected int failures = 0;
+    protected int maxFailures = 100;
 
     public UIMAMapReduceBase()
     {
@@ -68,16 +70,6 @@ public class UIMAMapReduceBase
         try {
             this.job = job;
 
-            // for (Path p :DistributedCache.getLocalCacheFiles(job)) {
-            // String path = p.toUri().getPath();
-            // if (path.endsWith(job.get("dkpro.uima.mapperdescriptor"))) {
-            // File aFile = new File(path);
-            // AnalysisEngineDescription aggregate = parser.parseAnalysisEngineDescription(new
-            // XMLInputSource(aFile));
-            // engine = AnalysisEngineFactory.createAggregate(aggregate);
-            //
-            // }
-            // }
             final EngineFactory engineFactory = (EngineFactory) Class.forName(
                     job.get("dkpro.uima.factory", DkproHadoopDriver.class.getName())).newInstance();
             engineFactory.configure(job);
@@ -104,8 +96,6 @@ public class UIMAMapReduceBase
                 final URL r = job.getResource(resource);
                 if (r != null && !resource.isEmpty()) {
                     this.resourceURIs.put(resource, r);
-                    System.out.println(resource + " " + r.toString());
-
                 }
 
             }
@@ -130,7 +120,7 @@ public class UIMAMapReduceBase
         catch (final Exception e) {
             sLogger.fatal("Error while configuring pipeline", e);
             e.printStackTrace();
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
 
     }
@@ -189,8 +179,7 @@ public class UIMAMapReduceBase
             copyRecursively(this.results_dir, FileOutputFormat.getWorkOutputPath(this.job));
         }
         catch (final AnalysisEngineProcessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new IOException(e);
         }
         this.engine.destroy();
     }
@@ -205,29 +194,21 @@ public class UIMAMapReduceBase
     private void copyRecursively(Path results_dir, Path dest)
         throws IOException
     {
-        try {
-            FileSystem.get(this.job).mkdirs(dest);
-            if (this.localFS.exists(results_dir)) {
-                final FileStatus[] content = this.localFS.listStatus(results_dir
-                        .makeQualified(this.localFS));
-                for (final FileStatus fileStatus : content) {
-                    if (fileStatus.isDir()) {
-                        copyRecursively(fileStatus.getPath(),
-                                dest.suffix(fileStatus.getPath().getName()));
-                    }
-                    else {
-                        FileUtil.copy(this.localFS, fileStatus.getPath(), FileSystem.get(this.job),
-                                dest.suffix(fileStatus.getPath().getName()), true, this.job);
-                    }
+        FileSystem.get(this.job).mkdirs(dest);
+        if (this.localFS.exists(results_dir)) {
+            final FileStatus[] content = this.localFS.listStatus(results_dir
+                    .makeQualified(this.localFS));
+            for (final FileStatus fileStatus : content) {
+                if (fileStatus.isDir()) {
+                    copyRecursively(fileStatus.getPath(),
+                            dest.suffix(fileStatus.getPath().getName()));
                 }
-                FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job), dest, true,
-                        this.job);
+                else {
+                    FileUtil.copy(this.localFS, fileStatus.getPath(), FileSystem.get(this.job),
+                            dest.suffix(fileStatus.getPath().getName()), true, this.job);
+                }
             }
-        }
-        catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job), dest, true, this.job);
         }
     }
-
 }

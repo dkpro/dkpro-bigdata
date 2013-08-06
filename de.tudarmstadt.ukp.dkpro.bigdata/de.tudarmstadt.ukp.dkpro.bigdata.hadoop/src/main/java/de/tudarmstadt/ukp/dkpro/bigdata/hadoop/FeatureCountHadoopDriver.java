@@ -86,13 +86,13 @@ public abstract class FeatureCountHadoopDriver
                     featureExtractor.configure(job);
                 }
                 catch (InstantiationException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
                 catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
                 catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             }
         }
@@ -110,7 +110,7 @@ public abstract class FeatureCountHadoopDriver
                 }
             }
             catch (CASException e) {
-                e.printStackTrace();
+                reporter.incrCounter("uima", e.toString(), 1);
             }
         }
     }

@@ -17,25 +17,21 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.hadoop;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CAS;
-import org.apache.uima.cas.CASException;
-import org.apache.uima.cas.impl.XCASDeserializer;
-import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.ProcessTrace;
 import org.apache.uima.util.ProcessTraceEvent;
-import org.xml.sax.SAXException;
+
+import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 
 /**
  * This class expects a UIMA Consumer as engine, it will not collect the output but will copy
@@ -46,51 +42,38 @@ import org.xml.sax.SAXException;
  */
 public class DkproReducer
     extends UIMAMapReduceBase
-    implements Reducer<Writable, Text, Writable, Text>
+    implements Reducer<Writable, CASWritable, Writable, CASWritable>
 {
 
     Log logger = LogFactory.getLog("DkproReducer");
     private int casType;
 
     @Override
-    public void reduce(Writable key, Iterator<Text> values, OutputCollector<Writable, Text> output,
-            Reporter reporter)
+    public void reduce(Writable key, Iterator<CASWritable> values,
+            OutputCollector<Writable, CASWritable> output, Reporter reporter)
         throws IOException
     {
 
-        while (values.hasNext())
+        while (values.hasNext()) {
+            final CAS aCAS = values.next().getCAS();
             try {
-                Text value = values.next();
-                CAS aCAS = engine.newCAS();
-
-                XCASDeserializer.deserialize(
-                        new ByteArrayInputStream(value.toString().getBytes("UTF-8")), aCAS);
-                // XmiCasSerializer.serialize(aCAS, new FileOutputStream(key.toString()+".xmi"));
-
-                ProcessTrace result = engine.process(aCAS.getJCas());
-                for (ProcessTraceEvent event : result.getEvents()) {
-                    reporter.incrCounter("uima", "reduce event:" + event.getType(), 1);
+                // let uima process the cas
+                final ProcessTrace result = this.engine.process(aCAS);
+                for (final ProcessTraceEvent event : result.getEvents()) {
+                    reporter.incrCounter("uima", "map event " + event.getType(), 1);
                 }
-                // ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                // XmiCasSerializer.serialize(aCAS,outputStream);
-                // output.collect(key, new Text(outputStream.toString()));
+                CASWritable value = new CASWritable();
+                value.setCAS(aCAS);
+                reporter.incrCounter("uima", "overall doc size", value.getCAS().getDocumentText()
+                        .length());
+                output.collect(key, value);
             }
-            catch (AnalysisEngineProcessException e) {
-                reporter.incrCounter("uima", "exception", 1);
+            catch (final AnalysisEngineProcessException e) {
+                reporter.incrCounter("uima", e.toString(), 1);
+                if (failures++ > maxFailures)
+                    throw new IOException(e);
 
             }
-            catch (ResourceInitializationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (SAXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (CASException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+        }
     }
-
 }

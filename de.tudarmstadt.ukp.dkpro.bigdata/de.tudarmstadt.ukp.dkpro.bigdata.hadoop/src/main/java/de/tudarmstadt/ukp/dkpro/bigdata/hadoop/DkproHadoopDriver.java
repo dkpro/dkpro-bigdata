@@ -32,6 +32,7 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
@@ -213,9 +214,9 @@ public abstract class DkproHadoopDriver
         DistributedCache.createSymlink(this.job);
         // sLogger.info("Running job "+job.getJobName());
 
-        JobClient.runJob(this.job);
-
-        return 0;
+        RunningJob runningJob = JobClient.runJob(this.job);
+        runningJob.waitForCompletion();
+        return runningJob.getJobState();
 
     }
 

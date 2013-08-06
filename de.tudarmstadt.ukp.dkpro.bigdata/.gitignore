@@ -1,2 +1,12 @@
-/.settings
-/.project~
+.settings
+.project~
+.project
+*~
+nohup.out
+.classpath
+*.class
+*.war
+bin
+target
+testinput
+testoutput

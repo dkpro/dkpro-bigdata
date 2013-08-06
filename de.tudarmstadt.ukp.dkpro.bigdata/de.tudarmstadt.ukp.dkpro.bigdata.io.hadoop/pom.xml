@@ -27,13 +27,14 @@
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
 	<packaging>jar</packaging>
 	<dependencies>
-		<dependency>
-			<groupId>org.uimafit</groupId>
-			<artifactId>uimafit</artifactId>
-		</dependency>
+		
 		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
 			<artifactId>de.tudarmstadt.ukp.dkpro.core.api.parameter-asl</artifactId>
+		</dependency>
+				<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>de.tudarmstadt.ukp.dkpro.core.api.io-asl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
@@ -78,6 +79,10 @@
 			<artifactId>hadoop-yarn-server-tests</artifactId>
 			<version>2.0.0-cdh4.3.0</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.uima</groupId>
+			<artifactId>uimafit</artifactId>
 		</dependency>
 	</dependencies>
 </project>

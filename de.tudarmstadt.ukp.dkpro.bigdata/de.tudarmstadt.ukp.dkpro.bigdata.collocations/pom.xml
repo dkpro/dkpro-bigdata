@@ -23,7 +23,7 @@
 			<artifactId>
 				de.tudarmstadt.ukp.dkpro.core.api.structure-asl
 			</artifactId>
-						<version>1.4.0</version>
+						
 			
 		</dependency>
   	
@@ -32,7 +32,7 @@
     	<artifactId>
     		de.tudarmstadt.ukp.dkpro.core.api.io-asl
     	</artifactId> 
-    	<version>1.4.0</version>
+    
     </dependency>
 
     <dependency>

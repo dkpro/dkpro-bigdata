@@ -34,7 +34,7 @@
   		<artifactId>
   			de.tudarmstadt.ukp.dkpro.core.io.text-asl
   		</artifactId>
-  	</dependency>
+  	</dependency> 
   	<dependency>
   		<groupId>org.uimafit</groupId>
   		<artifactId>uimafit</artifactId>

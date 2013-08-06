@@ -40,8 +40,8 @@ public class UimaPipelineOnHadoop
                     StanfordSegmenter.class, StanfordSegmenter.PARAM_CREATE_TOKENS, true);
 
             AnalysisEngineDescription treeTagger = createPrimitiveDescription(
-                    TreeTaggerPosLemmaTT4J.class, TreeTaggerPosLemmaTT4J.PARAM_LANGUAGE_CODE, "en",
-                    TreeTaggerPosLemmaTT4J.PARAM_LEMMA_ENABLED, true);
+                    TreeTaggerPosLemmaTT4J.class, TreeTaggerPosLemmaTT4J.PARAM_WRITE_LEMMA, "en",
+                    TreeTaggerPosLemmaTT4J.PARAM_WRITE_POS, true);
             // AnalysisEngineDescription stemmer = createPrimitiveDescription(SnowballStemmer.class,
             // SnowballStemmer.PARAM_LANGUAGE, "en");
 

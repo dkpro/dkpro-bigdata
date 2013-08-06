@@ -17,14 +17,13 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -33,10 +32,10 @@ import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.io.Text;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.impl.XmiCasSerializer;
+import org.apache.uima.fit.component.JCasConsumer_ImplBase;
+import org.apache.uima.fit.descriptor.ConfigurationParameter;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.uimafit.component.JCasConsumer_ImplBase;
-import org.uimafit.descriptor.ConfigurationParameter;
 
 import de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData;
 import de.tudarmstadt.ukp.dkpro.core.api.parameter.ComponentParameters;
@@ -164,8 +163,8 @@ public class XmiSequenceFileWriter
             throw new AnalysisEngineProcessException(e);
         }
         finally {
-            closeQuietly(docOS);
-            closeQuietly(typeOS);
+            IOUtils.closeQuietly(docOS);
+            IOUtils.closeQuietly(typeOS);
         }
     }
 }

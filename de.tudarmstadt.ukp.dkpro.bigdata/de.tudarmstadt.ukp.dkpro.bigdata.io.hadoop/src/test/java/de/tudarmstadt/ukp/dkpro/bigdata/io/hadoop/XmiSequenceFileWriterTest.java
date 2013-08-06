@@ -17,25 +17,23 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop;
 
-import static org.junit.Assert.assertTrue;
-import static org.uimafit.factory.TypeSystemDescriptionFactory.createTypeSystemDescription;
-import static org.uimafit.pipeline.SimplePipeline.runPipeline;
-
 import java.io.File;
+
+import junit.framework.TestCase;
 
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.collection.CollectionReader;
+import org.apache.uima.fit.factory.AnalysisEngineFactory;
+import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.uimafit.factory.AnalysisEngineFactory;
-import org.uimafit.factory.CollectionReaderFactory;
 
-import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.XmiSequenceFileWriter;
 import de.tudarmstadt.ukp.dkpro.core.api.io.ResourceCollectionReaderBase;
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
 
 public class XmiSequenceFileWriterTest
+    extends TestCase
 {
 
     @Rule
@@ -52,6 +50,7 @@ public class XmiSequenceFileWriterTest
     public void write()
         throws Exception
     {
+        Object x;
         final CollectionReader textReader = CollectionReaderFactory.createCollectionReader(
                 TextReader.class, createTypeSystemDescription(),
                 ResourceCollectionReaderBase.PARAM_PATH, "src/test/resources/texts",

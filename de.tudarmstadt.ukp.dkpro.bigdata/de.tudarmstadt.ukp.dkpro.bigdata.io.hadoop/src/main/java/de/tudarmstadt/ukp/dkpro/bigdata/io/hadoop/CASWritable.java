@@ -16,7 +16,7 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop;
 
-import static org.uimafit.factory.TypeSystemDescriptionFactory.createTypeSystemDescription;
+import static org.apache.uima.fit.factory.TypeSystemDescriptionFactory.createTypeSystemDescription;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;

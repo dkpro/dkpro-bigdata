@@ -17,7 +17,7 @@
 
 package de.tudarmstadt.ukp.dkpro.bigdata.collocations;
 
-import static org.uimafit.util.JCasUtil.select;
+import static org.apache.uima.fit.util.JCasUtil.select;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +31,7 @@ import org.apache.mahout.math.function.ObjectIntProcedure;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.apache.tools.ant.filters.StringInputStream;
 import org.apache.uima.cas.CASException;
+import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.metadata.ResourceMetaData;
@@ -40,7 +41,6 @@ import org.apache.uima.util.XMLInputSource;
 import org.apache.uima.util.XMLParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.uimafit.util.JCasUtil;
 import org.w3c.dom.Element;
 
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;

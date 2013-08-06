@@ -17,8 +17,7 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.hadoop;
 
-import static org.uimafit.factory.TypeSystemDescriptionFactory.createTypeSystemDescription;
-import static org.uimafit.pipeline.SimplePipeline.runPipeline;
+import static org.apache.uima.fit.pipeline.SimplePipeline.runPipeline;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -39,8 +38,8 @@ import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.collection.CollectionReader;
+import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.uimafit.factory.AnalysisEngineFactory;
 
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritableSequenceFileWriter;
@@ -153,8 +152,8 @@ public abstract class DkproHadoopDriver
         //
         // }
         if (reader != null) {
-            final AnalysisEngine xcasWriter = AnalysisEngineFactory.createPrimitive(
-                    CASWritableSequenceFileWriter.class, createTypeSystemDescription(),
+            final AnalysisEngine xcasWriter = AnalysisEngineFactory.createEngine(
+                    CASWritableSequenceFileWriter.class, // createTypeSystemDescription(),
                     CASWritableSequenceFileWriter.PARAM_PATH, inputPath.toString(),
                     CASWritableSequenceFileWriter.PARAM_COMPRESS, true,
                     CASWritableSequenceFileWriter.PARAM_FS, job.get(("fs.default.name"), "file:/"));

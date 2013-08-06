@@ -17,7 +17,7 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.hadoop;
 
-import static org.uimafit.factory.AnalysisEngineFactory.createAggregate;
+import static org.apache.uima.fit.factory.AnalysisEngineFactory.createAggregate;
 
 import java.io.IOException;
 import java.net.URL;

@@ -17,7 +17,7 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.hadoop;
 
-import static org.uimafit.factory.AnalysisEngineFactory.createAggregate;
+import static org.apache.uima.fit.factory.AnalysisEngineFactory.createAggregate;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -53,87 +53,87 @@ import org.xml.sax.SAXException;
  * @param <K>
  */
 public class DkproSimpleMapper<K extends Writable>
-	extends MapReduceBase
-	implements Mapper<K, Text, K, Text>
+    extends MapReduceBase
+    implements Mapper<K, Text, K, Text>
 {
-	private final Log sLogger = LogFactory.getLog(getClass());
-	AnalysisEngine engine;
-	private int casType;
+    private final Log sLogger = LogFactory.getLog(getClass());
+    AnalysisEngine engine;
+    private int casType;
 
-	public DkproSimpleMapper()
-	{
-		super();
-	}
+    public DkproSimpleMapper()
+    {
+        super();
+    }
 
-	@Override
-	public void configure(org.apache.hadoop.mapred.JobConf job)
-	{
+    @Override
+    public void configure(org.apache.hadoop.mapred.JobConf job)
+    {
 
-		casType = job.getInt("uima.input.cas.serialization", 0);
-		try {
+        casType = job.getInt("uima.input.cas.serialization", 0);
+        try {
 
-			EngineFactory engineFactory = (EngineFactory) Class.forName(
-					job.get("dkpro.uima.factory", DkproHadoopDriver.class.getCanonicalName()))
-					.newInstance();
-			engine = createAggregate(engineFactory.buildMapperEngine(job));
-		}
-		catch (Exception e) {
-			sLogger.fatal("Error while configuring pipeline", e);
-			throw new RuntimeException();
-		}
+            EngineFactory engineFactory = (EngineFactory) Class.forName(
+                    job.get("dkpro.uima.factory", DkproHadoopDriver.class.getCanonicalName()))
+                    .newInstance();
+            engine = createAggregate(engineFactory.buildMapperEngine(job));
+        }
+        catch (Exception e) {
+            sLogger.fatal("Error while configuring pipeline", e);
+            throw new RuntimeException();
+        }
 
-	};
+    };
 
-	@Override
-	public void close()
-		throws IOException
-	{
-		try {
-			engine.batchProcessComplete();
-		}
-		catch (AnalysisEngineProcessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		engine.destroy();
-	};
+    @Override
+    public void close()
+        throws IOException
+    {
+        try {
+            engine.batchProcessComplete();
+        }
+        catch (AnalysisEngineProcessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        engine.destroy();
+    };
 
-	@Override
-	public void map(K key, Text value, OutputCollector<K, Text> output, Reporter reporter)
-		throws IOException
-	{
-		try {
-			CAS aCAS = engine.newCAS();
-			if (casType == 0)
-				XCASDeserializer.deserialize(new StringInputStream(value.toString()), aCAS);
-			else
-				XmiCasDeserializer.deserialize(new StringInputStream(value.toString()), aCAS);
-			ProcessTrace result = engine.process(aCAS);
-			for (ProcessTraceEvent event : result.getEvents()) {
-				reporter.incrCounter("uima", "map event " + event.getType(), 1);
-			}
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			XCASSerializer.serialize(aCAS, outputStream);
-			K outkey = getOutputKey(aCAS);
-			String string = outputStream.toString();
-			// System.out.println(string);
-			output.collect(outkey, new Text(string));
-		}
-		catch (AnalysisEngineProcessException e) {
-			reporter.incrCounter("uima", e.toString(), 1);
-			e.printStackTrace();
-		}
-		catch (ResourceInitializationException e) {
-			reporter.incrCounter("uima", e.getLocalizedMessage(), 1);
-		}
-		catch (SAXException e) {
-			reporter.incrCounter("uima", e.getLocalizedMessage(), 1);
-		}
-	}
+    @Override
+    public void map(K key, Text value, OutputCollector<K, Text> output, Reporter reporter)
+        throws IOException
+    {
+        try {
+            CAS aCAS = engine.newCAS();
+            if (casType == 0)
+                XCASDeserializer.deserialize(new StringInputStream(value.toString()), aCAS);
+            else
+                XmiCasDeserializer.deserialize(new StringInputStream(value.toString()), aCAS);
+            ProcessTrace result = engine.process(aCAS);
+            for (ProcessTraceEvent event : result.getEvents()) {
+                reporter.incrCounter("uima", "map event " + event.getType(), 1);
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            XCASSerializer.serialize(aCAS, outputStream);
+            K outkey = getOutputKey(aCAS);
+            String string = outputStream.toString();
+            // System.out.println(string);
+            output.collect(outkey, new Text(string));
+        }
+        catch (AnalysisEngineProcessException e) {
+            reporter.incrCounter("uima", e.toString(), 1);
+            e.printStackTrace();
+        }
+        catch (ResourceInitializationException e) {
+            reporter.incrCounter("uima", e.getLocalizedMessage(), 1);
+        }
+        catch (SAXException e) {
+            reporter.incrCounter("uima", e.getLocalizedMessage(), 1);
+        }
+    }
 
-	protected K getOutputKey(CAS aCAS)
-	{
-		return (K) new IntWritable(1);
-	}
+    protected K getOutputKey(CAS aCAS)
+    {
+        return (K) new IntWritable(1);
+    }
 
 }

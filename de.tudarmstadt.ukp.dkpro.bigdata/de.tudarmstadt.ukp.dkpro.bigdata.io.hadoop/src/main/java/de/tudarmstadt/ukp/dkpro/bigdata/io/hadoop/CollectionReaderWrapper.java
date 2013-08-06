@@ -24,97 +24,113 @@ import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.collection.CollectionException;
 import org.apache.uima.collection.CollectionReader;
+import org.apache.uima.fit.factory.JCasFactory;
+import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.apache.uima.util.Progress;
-import org.uimafit.factory.JCasFactory;
-import org.uimafit.factory.TypeSystemDescriptionFactory;
 
 /**
  * Wraps an existing CollectionReader (UIMA) instance as RecordReader<Text, CASWritable> (Hadoop).
  * 
  * @author Johannes Simon
- *
+ * 
  */
-public class CollectionReaderWrapper implements
-		RecordReader<Text, CASWritable> {
-	
-	final private CollectionReader reader;
-	
-	private TypeSystemDescription typeSystem;
-	
-	public CollectionReaderWrapper(CollectionReader reader) {
-		this.reader = reader;
-		try {
-			typeSystem = TypeSystemDescriptionFactory.createTypeSystemDescription();
-		} catch (ResourceInitializationException e) {
-			e.printStackTrace();
-		}
-	}
+public class CollectionReaderWrapper
+    implements RecordReader<Text, CASWritable>
+{
 
-	@Override
-	public void close() throws IOException {
-		reader.close();
-	}
+    final private CollectionReader reader;
 
-	@Override
-	public Text createKey() {
-		return new Text();
-	}
+    private TypeSystemDescription typeSystem;
 
-	@Override
-	public CASWritable createValue() {
-		return new CASWritable();
-	}
+    public CollectionReaderWrapper(CollectionReader reader)
+    {
+        this.reader = reader;
+        try {
+            typeSystem = TypeSystemDescriptionFactory.createTypeSystemDescription();
+        }
+        catch (ResourceInitializationException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public long getPos() throws IOException {
-		Progress[] progressArr = reader.getProgress();
-		for (Progress p : progressArr) {
-			if (p.getUnit().equals(Progress.BYTES))
-				return p.getCompleted();
-		}
-		
-		return 0;
-	}
-	
-	private static float getPercent(long part, long total) {
-		if (total == 0)
-			return 0.0f;
-		return (float)part / (float)total;
-	}
+    @Override
+    public void close()
+        throws IOException
+    {
+        reader.close();
+    }
 
-	@Override
-	public float getProgress() throws IOException {
-		Progress[] progressArr = reader.getProgress();
-		for (Progress p : progressArr) {
-			// Use the first progress type that reports a total > 0
-			if (p.getTotal() > 0)
-				return getPercent(p.getCompleted(), p.getTotal());
-		}
-		
-		return 0.0f;
-	}
+    @Override
+    public Text createKey()
+    {
+        return new Text();
+    }
 
-	@Override
-	public boolean next(Text key, CASWritable value) throws IOException {
-		
-		try {
-			if (!reader.hasNext())
-				return false;
-			CAS nextCAS = JCasFactory.createJCas(typeSystem).getCas();
-			reader.getNext(nextCAS);
-			value.setCAS(nextCAS);
-			
-			return true;
-		} catch (CollectionException e) {
-			e.printStackTrace();
-		} catch (UIMAException e) {
-			e.printStackTrace();
-		}
-		
-		// Error occured. Stop reading.
-		return false;
-	}
+    @Override
+    public CASWritable createValue()
+    {
+        return new CASWritable();
+    }
+
+    @Override
+    public long getPos()
+        throws IOException
+    {
+        Progress[] progressArr = reader.getProgress();
+        for (Progress p : progressArr) {
+            if (p.getUnit().equals(Progress.BYTES))
+                return p.getCompleted();
+        }
+
+        return 0;
+    }
+
+    private static float getPercent(long part, long total)
+    {
+        if (total == 0)
+            return 0.0f;
+        return (float) part / (float) total;
+    }
+
+    @Override
+    public float getProgress()
+        throws IOException
+    {
+        Progress[] progressArr = reader.getProgress();
+        for (Progress p : progressArr) {
+            // Use the first progress type that reports a total > 0
+            if (p.getTotal() > 0)
+                return getPercent(p.getCompleted(), p.getTotal());
+        }
+
+        return 0.0f;
+    }
+
+    @Override
+    public boolean next(Text key, CASWritable value)
+        throws IOException
+    {
+
+        try {
+            if (!reader.hasNext())
+                return false;
+            CAS nextCAS = JCasFactory.createJCas(typeSystem).getCas();
+            reader.getNext(nextCAS);
+            value.setCAS(nextCAS);
+
+            return true;
+        }
+        catch (CollectionException e) {
+            e.printStackTrace();
+        }
+        catch (UIMAException e) {
+            e.printStackTrace();
+        }
+
+        // Error occured. Stop reading.
+        return false;
+    }
 
 }

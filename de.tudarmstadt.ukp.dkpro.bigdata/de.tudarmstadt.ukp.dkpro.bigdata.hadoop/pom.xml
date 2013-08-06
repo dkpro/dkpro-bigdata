@@ -10,10 +10,7 @@
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
 	<name>DKPro bigdata - Run Pipelines on Hadoop</name>
 	<dependencies>
-		<dependency>
-			<groupId>org.uimafit</groupId>
-			<artifactId>uimafit</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
 			<artifactId>de.tudarmstadt.ukp.dkpro.core.api.io-asl</artifactId>

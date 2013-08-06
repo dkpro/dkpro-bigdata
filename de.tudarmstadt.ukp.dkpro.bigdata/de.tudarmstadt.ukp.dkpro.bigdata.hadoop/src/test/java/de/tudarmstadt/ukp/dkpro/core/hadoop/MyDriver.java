@@ -77,10 +77,4 @@ public final class MyDriver
         return null;
     }
 
-    @Override
-    public void configure(Configuration job)
-    {
-        // TODO Auto-generated method stub
-
-    }
 }

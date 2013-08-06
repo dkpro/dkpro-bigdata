@@ -40,6 +40,8 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.tudarmstadt.ukp.dkpro.bigdata.collocations.CollocMapper.Window;
+
 /** Driver for LLR Collocation discovery mapreduce job */
 public final class CollocDriver
     extends AbstractJob
@@ -59,6 +61,9 @@ public final class CollocDriver
     private static final int DEFAULT_PASS1_NUM_REDUCE_TASKS = 1;
 
     private static final Logger log = LoggerFactory.getLogger(CollocDriver.class);
+
+    public static final String WINDOW_SIZE = "colloc.window";
+    public static final String WINDOW_TYPE = "colloc.window_type";
 
     public static void main(String[] args)
         throws Exception
@@ -91,7 +96,11 @@ public final class CollocDriver
                 AssocReducer.DEFAULT_ASSOC);
         addFlag("unigram", "u",
                 "If set, unigrams will be emitted in the final output alongside collocations");
-
+        addOption("windowSize", "ws", "(Optional) Window size");
+        addOption("windowMode", "wm", "(Optional) DOCUMENT, SENTENCE, S_WINDOW, C_WINDOW, FIXED");
+        addOption("ngramLimit", "nl",
+                "(Optional) maximum of ngrams per unit - to prevent memory overflow");
+        addOption("usePos", "p", "(Optional)");
         Map<String, List<String>> argMap = parseArguments(args);
 
         if (argMap == null) {
@@ -139,12 +148,20 @@ public final class CollocDriver
             metric = getOption("metric");
         }
         log.info("Association Metric: {}", metric);
+        Window windowType = Window.SENTENCE;
+        if (getOption("windowType") != null) {
+            windowType = Window.valueOf(getOption("windowType").toUpperCase());
+        }
+        int windowSize = 3;
+        if (getOption("windowSize") != null) {
+            windowSize = Integer.parseInt(getOption("windowSize"));
+        }
 
         boolean emitUnigrams = argMap.containsKey("emitUnigrams");
         reduceTasks = 14;
         // parse input and extract collocations
         long ngramCount = generateCollocations(input, output, getConf(), emitUnigrams,
-                maxNGramSize, reduceTasks, minSupport);
+                maxNGramSize, reduceTasks, minSupport, windowType, windowSize);
 
         // tally collocations and perform LLR calculation
         for (String m : metric.split(",")) {
@@ -183,12 +200,13 @@ public final class CollocDriver
      *            number of reducers used
      */
     public static void generateAllGrams(Path input, Path output, Configuration baseConf,
-            int maxNGramSize, int minSupport, float minLLRValue, int reduceTasks, String metric)
+            int maxNGramSize, int minSupport, float minLLRValue, int reduceTasks, String metric,
+            Window windowMode, int windowSize)
         throws IOException, InterruptedException, ClassNotFoundException
     {
         // parse input and extract collocations
         long ngramCount = generateCollocations(input, output, baseConf, true, maxNGramSize,
-                reduceTasks, minSupport);
+                reduceTasks, minSupport, windowMode, windowSize);
 
         // tally collocations and perform LLR calculation
         computeNGramsPruneByLLR(output, baseConf, ngramCount, true, minLLRValue, reduceTasks,
@@ -199,7 +217,8 @@ public final class CollocDriver
      * pass1: generate collocations, ngrams
      */
     private static long generateCollocations(Path input, Path output, Configuration baseConf,
-            boolean emitUnigrams, int maxNGramSize, int reduceTasks, int minSupport)
+            boolean emitUnigrams, int maxNGramSize, int reduceTasks, int minSupport, Window mode,
+            int winsize)
         throws IOException, ClassNotFoundException, InterruptedException
     {
 
@@ -207,8 +226,11 @@ public final class CollocDriver
         con.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
         con.setInt(CollocMapper.MAX_SHINGLE_SIZE, maxNGramSize);
         con.setInt(CollocReducer.MIN_SUPPORT, minSupport);
-        con.setInt("mapred.job.map.memory.mb", 2560);
-        con.set("mapred.child.java.opts", "-Xmx2460M");
+        con.set(WINDOW_TYPE, mode.toString());
+        con.setInt(WINDOW_SIZE, winsize);
+
+        con.setInt("mapred.job.map.memory.mb", 6000);
+        con.set("mapred.child.java.opts", "-Xmx5900M");
         con.set("mapred.reduce.child.java.opts", "-Xmx5000M");
         con.setInt("mapred.job.reduce.memory.mb", 5120);
         con.setBoolean("mapred.compress.map.output", true);
@@ -219,8 +241,8 @@ public final class CollocDriver
                 "org.apache.hadoop.io.compress.DefaultCodec");
         con.setInt("mapred.task.timeout", 6000000);
         con.setInt("io.sort.factor", 50);
-        con.setInt("io.sort.mb", 500);
         con.setInt("mapreduce.map.tasks", 256);
+
         Job job = new Job(con);
         job.setJobName(CollocDriver.class.getSimpleName() + ".generateCollocations:" + input);
         job.setJarByClass(CollocDriver.class);
@@ -294,13 +316,20 @@ public final class CollocDriver
         job.setReducerClass(AssocReducer.class);
         job.setNumReduceTasks(reduceTasks);
         // Defines additional single text based output 'text' for the job
-        MultipleOutputs.addNamedOutput(job, "contingency", TextOutputFormat.class, Text.class,
-                Text.class);
+        // MultipleOutputs.addNamedOutput(job, "contingency", TextOutputFormat.class, Text.class,
+        // Text.class);
 
         // Defines additional multi sequencefile based output 'sequence' for the
         // job
         MultipleOutputs.addNamedOutput(job, "llr", TextOutputFormat.class, Text.class,
                 DoubleWritable.class);
+        MultipleOutputs.addNamedOutput(job, "pmi", TextOutputFormat.class, Text.class,
+                DoubleWritable.class);
+        MultipleOutputs.addNamedOutput(job, "chi", TextOutputFormat.class, Text.class,
+                DoubleWritable.class);
+        MultipleOutputs.addNamedOutput(job, "dice", TextOutputFormat.class, Text.class,
+                DoubleWritable.class);
+
         boolean succeeded = job.waitForCompletion(true);
         if (!succeeded) {
             throw new IllegalStateException("Job failed!");

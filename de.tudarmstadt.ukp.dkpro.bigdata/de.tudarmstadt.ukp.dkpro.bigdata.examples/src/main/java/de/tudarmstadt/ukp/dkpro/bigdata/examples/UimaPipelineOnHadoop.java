@@ -16,7 +16,7 @@ import de.tudarmstadt.ukp.dkpro.bigdata.hadoop.DkproReducer;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.treetagger.TreeTaggerPosLemmaTT4J;
 
-public class SimplePipeline
+public class UimaPipelineOnHadoop
     extends DkproHadoopDriver
 {
     //
@@ -90,7 +90,7 @@ public class SimplePipeline
     {
 
         try {
-            SimplePipeline pipeline = new SimplePipeline();
+            UimaPipelineOnHadoop pipeline = new UimaPipelineOnHadoop();
             pipeline.setMapperClass(DkproMapper.class);
             pipeline.setReducerClass(DkproReducer.class);
 

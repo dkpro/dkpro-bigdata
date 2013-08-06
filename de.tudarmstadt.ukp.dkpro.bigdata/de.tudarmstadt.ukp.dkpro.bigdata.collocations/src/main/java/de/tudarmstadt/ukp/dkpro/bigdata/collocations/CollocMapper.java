@@ -69,9 +69,12 @@ public class CollocMapper
         NGRAM_TOTAL, OVERFLOW, MULTIWORD, EMITTED_UNIGRAM, SENTENCES, LEMMA, DOCSIZE, EMPTYDOC
     }
 
-    private static final Logger log = LoggerFactory.getLogger(CollocMapper.class);
+    public enum Window
+    {
+        DOCUMENT, SENTENCE, S_WINDOW, C_WINDOW, FIXED
+    }
 
-    private int maxShingleSize;
+    private static final Logger log = LoggerFactory.getLogger(CollocMapper.class);
 
     private boolean emitUnigrams;
 
@@ -81,8 +84,11 @@ public class CollocMapper
 
     private GramKey gramKey;
 
-    private final int window = 3;
+    private int window = 3;
 
+    private Window windowMode = Window.SENTENCE;
+
+    private final int MAX_NGRAMS = 5000;
     Pattern pattern = Pattern.compile(".*[\"\'#§$%&:\\+!,-]+.*");
 
     /**
@@ -143,26 +149,19 @@ public class CollocMapper
             context.getCounter(Count.LEMMA).increment(lemmaCount);
 
             context.getCounter(Count.DOCSIZE).increment(jcas.getDocumentText().length());
-            OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
-            OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
-            int sentenceCount = 0;
+
             int count = 0;
-            count += collectCooccurencesFromCas(context, jcas, ngrams, unigrams);
-            if (count > 10000) {
-                flushCollocations(context, ngrams, unigrams);
-                // I suspect the clear method is not working properly
-                ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
-                unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
-                context.getCounter(Count.SENTENCES).increment(sentenceCount);
-                context.getCounter(Count.NGRAM_TOTAL).increment(count);
-                count = 0;
-                sentenceCount = 0;
-            }
-            // Annotation[] previous = new Annotation[window];
+            if (this.windowMode == Window.DOCUMENT)
+                count = extractWholeDocument(context, jcas, lemmaCount, count);
+            else if (this.windowMode == Window.SENTENCE)
+
+                count = extractSentence(context, jcas, lemmaCount, count);
+            // OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount *
+            // 4);
+            // OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
+            // int sentenceCount=0;
             // for (final Annotation sentence : select(jcas, Sentence.class)) {
-            // for (int j = 0; j < previous.length - 1; j++)
-            // previous[j] = previous[j + 1];
-            // previous[previous.length - 1] = sentence;
+            //
             // sentenceCount++;
             // count += collectCooccurencesFromCoveringAnnotation(context, jcas, sentence, ngrams,
             // unigrams);
@@ -177,7 +176,7 @@ public class CollocMapper
             // sentenceCount = 0;
             // }
             // }
-            flushCollocations(context, ngrams, unigrams);
+            // flushCollocations(context, ngrams, unigrams);
             context.getCounter(Count.NGRAM_TOTAL).increment(count);
 
         }
@@ -191,6 +190,49 @@ public class CollocMapper
         finally {
             // Closeables.closeQuietly(sf);
         }
+    }
+
+    private int extractSentence(final Context context, final JCas jcas, int lemmaCount, int count)
+    {
+        OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
+        OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
+        int sentenceCount = 0;
+
+        Annotation[] previous = new Annotation[window];
+        for (final Annotation sentence : select(jcas, Sentence.class)) {
+            for (int j = 0; j < previous.length - 1; j++)
+                previous[j] = previous[j + 1];
+            previous[previous.length - 1] = sentence;
+            sentenceCount++;
+            count += collectCooccurencesFromCoveringAnnotation(context, jcas, sentence, ngrams,
+                    unigrams);
+            if (count > 10000) {
+                flushCollocations(context, ngrams, unigrams);
+                // I suspect the clear method is not working properly
+                ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
+                unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
+                context.getCounter(Count.SENTENCES).increment(sentenceCount);
+                context.getCounter(Count.NGRAM_TOTAL).increment(count);
+                count = 0;
+                sentenceCount = 0;
+            }
+        }
+        flushCollocations(context, ngrams, unigrams);
+        return count;
+    }
+
+    private int extractWholeDocument(final Context context, final JCas jcas, int lemmaCount,
+            int count)
+    {
+        OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
+        OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
+        int sentenceCount = 0;
+        count += collectCooccurencesFromCas(context, jcas, ngrams, unigrams);
+
+        flushCollocations(context, ngrams, unigrams);
+        context.getCounter(Count.SENTENCES).increment(sentenceCount);
+        context.getCounter(Count.NGRAM_TOTAL).increment(count);
+        return count;
     }
 
     private void flushCollocations(final Context context, OpenObjectIntHashMap<String> ngrams,
@@ -517,8 +559,9 @@ public class CollocMapper
     {
         super.setup(context);
         Configuration conf = context.getConfiguration();
-        this.maxShingleSize = conf.getInt(MAX_SHINGLE_SIZE, DEFAULT_MAX_SHINGLE_SIZE);
-
+        this.window = conf.getInt(CollocDriver.WINDOW_SIZE, 3);
+        this.windowMode = Window
+                .valueOf(conf.get(CollocDriver.WINDOW_TYPE, Window.SENTENCE.name()));
         this.emitUnigrams = conf.getBoolean(CollocDriver.EMIT_UNIGRAMS,
                 CollocDriver.DEFAULT_EMIT_UNIGRAMS);
         this.metadata = new ResourceMetaData_impl();
@@ -535,9 +578,12 @@ public class CollocMapper
         }
 
         if (log.isInfoEnabled()) {
-            log.info("Max Ngram size is {}", this.maxShingleSize);
+            // log.info("Max Ngram size is {}", this.maxShingleSize);
             log.info("Emit Unitgrams is {}", emitUnigrams);
+            log.info("Window Mode is {}", this.windowMode.name());
+            log.info("Window Size is {}", window);
+            log.info("Emit Unitgrams is {}", emitUnigrams);
+
         }
     }
-
 }

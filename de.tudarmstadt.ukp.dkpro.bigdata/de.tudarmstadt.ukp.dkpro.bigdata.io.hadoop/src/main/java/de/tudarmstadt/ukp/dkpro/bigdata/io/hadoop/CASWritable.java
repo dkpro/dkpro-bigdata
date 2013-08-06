@@ -47,6 +47,7 @@ public class CASWritable
 
     public CASWritable()
     {
+
         try {
             cas = CasCreationUtils.createCas(createTypeSystemDescription(), null, null);
         }

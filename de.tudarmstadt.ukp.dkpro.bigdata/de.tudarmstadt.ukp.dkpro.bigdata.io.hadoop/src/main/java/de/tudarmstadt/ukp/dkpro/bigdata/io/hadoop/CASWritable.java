@@ -43,7 +43,7 @@ public class CASWritable
     implements Writable
 {
 
-    private CAS cas;
+    protected CAS cas;
 
     public CASWritable()
     {

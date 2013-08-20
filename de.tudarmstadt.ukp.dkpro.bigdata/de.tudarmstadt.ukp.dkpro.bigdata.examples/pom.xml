@@ -36,48 +36,26 @@
   		</artifactId>
   	</dependency> 
   	<dependency>
-  		<groupId>org.uimafit</groupId>
-  		<artifactId>uimafit</artifactId>
-  	</dependency>
-  		<dependency>
-    <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-    <artifactId>de.tudarmstadt.ukp.dkpro.core.treetagger-asl</artifactId>
-  
-</dependency>
-		<dependency>
-				<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-				<artifactId>de.tudarmstadt.ukp.dkpro.core.treetagger-bin</artifactId>
-				<version>20120803.0</version>
-			</dependency>
-			<dependency>
-				<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-				<artifactId>de.tudarmstadt.ukp.dkpro.core.treetagger-model-de</artifactId>
-				<version>20120417.0</version>
-			</dependency>
-			<dependency>
-				<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-				<artifactId>de.tudarmstadt.ukp.dkpro.core.treetagger-model-en</artifactId>
-	<version>20111109.0</version>
-			</dependency>
-  	<dependency>
   		<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
   		<artifactId>
   			de.tudarmstadt.ukp.dkpro.core.api.segmentation-asl
   		</artifactId>
-  		<version>1.3.0</version>
+  		
+  	</dependency>
+
+
+  	<dependency>
+  		<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+  		<artifactId>
+  			de.tudarmstadt.ukp.dkpro.core.tokit-asl
+  		</artifactId>
   	</dependency>
   	<dependency>
   		<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
   		<artifactId>
-  			de.tudarmstadt.ukp.dkpro.core.stanfordnlp-gpl
+  			de.tudarmstadt.ukp.dkpro.core.snowball-asl
   		</artifactId>
-  		
   	</dependency>
-  			<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-			<version>3.1</version>
-		</dependency>
   </dependencies><build><plugins>
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>

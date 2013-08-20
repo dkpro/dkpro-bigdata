@@ -71,7 +71,7 @@ public class CASWritableSequenceFileWriter
     private boolean compress;
 
     public static final String PARAM_FS = "HadoopFs";
-    @ConfigurationParameter(name = PARAM_FS, mandatory = true, defaultValue = "hdfs://10.130.21.10:8020")
+    @ConfigurationParameter(name = PARAM_FS, mandatory = true, defaultValue = "hdfs://10.130.21.11:8020")
     private String fileSystemName;
 
     private Writer writer;
@@ -107,7 +107,8 @@ public class CASWritableSequenceFileWriter
         try {
             final FileSystem fs = FileSystem.get(URI.create(filename), conf);
             final Path path = new Path(URI.create(filename).toString());
-            this.writer = SequenceFile.createWriter(fs, conf, path, Text.class, CASWritable.class);
+            this.writer = SequenceFile.createWriter(fs, conf, path, Text.class,
+                    BinCasWritable.class);
 
         }
         catch (final IOException e) {
@@ -138,7 +139,7 @@ public class CASWritableSequenceFileWriter
         String documentKey = createKeyFromDocument(meta);
 
         try {
-            CASWritable casWritable = new CASWritable();
+            CASWritable casWritable = new BinCasWritable();
             casWritable.setCAS(aJCas.getCas());
             this.writer.append(new Text(documentKey), casWritable);
 

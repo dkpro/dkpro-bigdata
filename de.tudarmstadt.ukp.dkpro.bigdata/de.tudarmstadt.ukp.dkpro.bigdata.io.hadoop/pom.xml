@@ -80,9 +80,6 @@
 			<version>2.0.0-cdh4.3.0</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.uima</groupId>
-			<artifactId>uimafit</artifactId>
-		</dependency>
+
 	</dependencies>
 </project>

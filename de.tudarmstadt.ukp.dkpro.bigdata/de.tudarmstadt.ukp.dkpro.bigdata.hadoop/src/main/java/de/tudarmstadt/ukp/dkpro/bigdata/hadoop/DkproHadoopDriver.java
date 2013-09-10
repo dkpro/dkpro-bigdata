@@ -41,6 +41,7 @@ import org.apache.uima.collection.CollectionReader;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 
+import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.BinCasWritable;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritableSequenceFileWriter;
 
@@ -138,8 +139,18 @@ public abstract class DkproHadoopDriver
         Class.forName("de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable");
         // set the factory class name
         this.job.set("dkpro.uima.factory", getEngineFactoryClass().getName());
+        Path inputPath;
+        if (args[0].contains(",")) {
+            String[] inputPaths = args[0].split(",");
+            inputPath = new Path(inputPaths[0]);
+            for (String path : inputPaths)
+                FileInputFormat.addInputPath(job, new Path(path));
+        }
+        else {
+            inputPath = new Path(args[0]); // input
+            FileInputFormat.setInputPaths(this.job, inputPath);
 
-        final Path inputPath = new Path(args[0]); // input
+        }
         final Path outputPath = new Path(args[1]);// output
         final CollectionReader reader = buildCollectionReader();
         // if a collection reader was defined, import data into hdfs
@@ -166,8 +177,6 @@ public abstract class DkproHadoopDriver
         // if (args.length > 2) {
         // numMappers = Integer.parseInt(args[2]);
         // }
-
-        FileInputFormat.setInputPaths(this.job, inputPath);
 
         FileOutputFormat.setOutputPath(this.job, outputPath);
         // SequenceFileOutputFormat.setCompressOutput(this.job, true);
@@ -198,9 +207,9 @@ public abstract class DkproHadoopDriver
         }
         // this.job.setOutputFormat(TextOutputFormat.class);
         this.job.setMapOutputKeyClass(Text.class);
-        this.job.setMapOutputValueClass(CASWritable.class);
+        this.job.setMapOutputValueClass(BinCasWritable.class);
         this.job.setOutputKeyClass(Text.class);
-        this.job.setOutputValueClass(CASWritable.class);
+        this.job.setOutputValueClass(BinCasWritable.class);
         this.job.setJobName(this.getClass().getSimpleName());
         // this.job.set("mapred.child.java.opts", "-Xmx1g");
         this.job.setInt("mapred.job.map.memory.mb", 1280);

@@ -6,6 +6,8 @@ for I in lib/*;do HADOOP_CLASSPATH=$HADOOP_CLASSPATH:$I;done
 for I in lib/*;do CP=$CP,$I;done
 export HADOOP_CLASSPATH=$HADOOP_CLASSPATH:$JAR
 echo $HADOOP_CLASSPATH
-RUN="hadoop jar $JAR $1 -Dmapreduce.job.queuename=ukp -libjars $JAR,$CP  $2 $3 $4 $5 $6 $7 $8 $9 $10 $11 $12 $13"
+export CLASS=$1
+shift
+RUN="hadoop jar $JAR $CLASS -Dmapreduce.job.queuename=ukp -libjars $JAR,$CP  $*"
 echo $RUN
 $RUN

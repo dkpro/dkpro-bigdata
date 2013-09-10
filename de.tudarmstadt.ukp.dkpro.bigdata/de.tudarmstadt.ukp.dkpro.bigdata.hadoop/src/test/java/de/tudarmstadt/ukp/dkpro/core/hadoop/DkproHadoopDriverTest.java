@@ -17,26 +17,28 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.core.hadoop;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.tudarmstadt.ukp.dkpro.bigdata.hadoop.DkproHadoopDriver;
 
 public class DkproHadoopDriverTest
 {
-	@Test
-	public void testHadoopDriver()
-		throws Exception
-	{
-		final DkproHadoopDriver ab = new MyDriver();
+    @Test
+    @Ignore
+    public void testHadoopDriver()
+        throws Exception
+    {
+        final DkproHadoopDriver ab = new MyDriver();
 
-		final boolean ok = true;
-		// String[] args = {"testdata","output"};
-		//
-		// Configuration conf = new Configuration();
-		// conf.set("fs.default.name","file:///");
-		//
-		// ToolRunner.run(conf,ab, args );
-		//
-		assert (ok);
-	}
+        final boolean ok = true;
+        // String[] args = {"testdata","output"};
+        //
+        // Configuration conf = new Configuration();
+        // conf.set("fs.default.name","file:///");
+        //
+        // ToolRunner.run(conf,ab, args );
+        //
+        assert (ok);
+    }
 }

@@ -1,9 +1,7 @@
 package de.tudarmstadt.ukp.dkpro.core.hadoop;
 
-import static org.uimafit.factory.AnalysisEngineFactory.createAggregateDescription;
-import static org.uimafit.factory.AnalysisEngineFactory.createPrimitiveDescription;
-import static org.uimafit.factory.CollectionReaderFactory.createCollectionReader;
-
+import static org.apache.uima.fit.factory.CollectionReaderFactory.*;
+import static org.apache.uima.fit.factory.AnalysisEngineFactory.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.InputFormat;
@@ -35,8 +33,9 @@ public final class MyDriver
     public CollectionReader buildCollectionReader()
         throws ResourceInitializationException
     {
-        return createCollectionReader(TextReader.class, TextReader.PARAM_PATH,
-                "src/test/resources/text/", TextReader.PARAM_PATTERNS, new String[] { "[+]*.txt" });
+        return null;
+        // return createReader(TextReader.class, TextReader.PARAM_PATH, "src/test/resources/text/");
+        // TextReader.PARAM_PATTERNS, new String[] { "[+]*.txt" });
     }
 
     @Override
@@ -53,7 +52,7 @@ public final class MyDriver
         throws ResourceInitializationException
     {
         return createAggregateDescription(createPrimitiveDescription(TextWriter.class,
-                TextWriter.PARAM_PATH, "$dir/output"));
+                TextWriter.PARAM_TARGET_LOCATION, "$dir/output"));
     }
 
     @Override

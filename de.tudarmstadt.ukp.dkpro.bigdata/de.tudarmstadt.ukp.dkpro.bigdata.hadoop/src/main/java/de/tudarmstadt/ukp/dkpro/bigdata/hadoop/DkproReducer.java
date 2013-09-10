@@ -23,11 +23,14 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CAS;
+import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.ProcessTrace;
 import org.apache.uima.util.ProcessTraceEvent;
 
@@ -62,7 +65,14 @@ public class DkproReducer
                 for (final ProcessTraceEvent event : result.getEvents()) {
                     reporter.incrCounter("uima", "map event " + event.getType(), 1);
                 }
-                CASWritable value = new CASWritable();
+                CASWritable value;
+                // create a CASWritable of the type as specified by job.setOutputValueClass()
+                try {
+                    value = (CASWritable) outputValueClass.newInstance();
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 value.setCAS(aCAS);
                 reporter.incrCounter("uima", "overall doc size", value.getCAS().getDocumentText()
                         .length());
@@ -75,5 +85,12 @@ public class DkproReducer
 
             }
         }
+    }
+
+    @Override
+    AnalysisEngineDescription getEngineDescription(EngineFactory factory, JobConf job)
+        throws ResourceInitializationException
+    {
+        return factory.buildReducerEngine(job);
     }
 }

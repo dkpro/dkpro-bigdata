@@ -17,7 +17,7 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.hadoop;
 
-import static org.apache.uima.fit.factory.AnalysisEngineFactory.createAggregate;
+import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngine;
 
 import java.io.IOException;
 import java.net.URL;
@@ -39,14 +39,17 @@ import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.analysis_engine.metadata.AnalysisEngineMetaData;
+import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.ResourceSpecifier;
 import org.apache.uima.resource.metadata.ConfigurationParameter;
 import org.apache.uima.resource.metadata.ConfigurationParameterDeclarations;
 import org.apache.uima.resource.metadata.ConfigurationParameterSettings;
 
-public class UIMAMapReduceBase
+public abstract class UIMAMapReduceBase
     extends MapReduceBase
 {
+    protected Class<?> outputValueClass;
+    protected Class<?> mapOutputValueClass;
 
     private final Log sLogger = LogFactory.getLog(getClass());
     protected AnalysisEngine engine;
@@ -58,24 +61,30 @@ public class UIMAMapReduceBase
     private Map<String, URL> resourceURIs;
     protected int failures = 0;
     protected int maxFailures = 100;
+    protected int samplingPropability = 100;
 
     public UIMAMapReduceBase()
     {
         super();
     }
 
+    abstract AnalysisEngineDescription getEngineDescription(EngineFactory factory, JobConf job)
+        throws ResourceInitializationException;
+
     @Override
     public void configure(JobConf job)
     {
         try {
             this.job = job;
-
+            this.mapOutputValueClass = job.getMapOutputValueClass();
+            this.outputValueClass = job.getOutputValueClass();
+            this.samplingPropability = job.getInt("dkpro.map.samplingratio", 100);
             final EngineFactory engineFactory = (EngineFactory) Class.forName(
                     job.get("dkpro.uima.factory", DkproHadoopDriver.class.getName())).newInstance();
             engineFactory.configure(job);
 
-            final AnalysisEngineDescription engineDescription = engineFactory
-                    .buildMapperEngine(job);
+            final AnalysisEngineDescription engineDescription = getEngineDescription(engineFactory,
+                    job);
 
             AnalysisEngineMetaData analysisEngineMetaData = engineDescription
                     .getAnalysisEngineMetaData();
@@ -114,7 +123,7 @@ public class UIMAMapReduceBase
                 }
             }
 
-            this.engine = createAggregate(engineDescription);
+            this.engine = createEngine(engineDescription);
 
         }
         catch (final Exception e) {

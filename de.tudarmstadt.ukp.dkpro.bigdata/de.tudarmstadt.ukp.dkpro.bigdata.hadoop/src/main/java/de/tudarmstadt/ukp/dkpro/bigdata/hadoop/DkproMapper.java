@@ -18,16 +18,23 @@
 package de.tudarmstadt.ukp.dkpro.bigdata.hadoop;
 
 import java.io.IOException;
+import java.util.Random;
 
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CAS;
+import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.ProcessTrace;
 import org.apache.uima.util.ProcessTraceEvent;
 
+import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.BinCasWritable;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 
 /**
@@ -48,9 +55,12 @@ public class DkproMapper
         CAS, TEXT, WEBARCHIVE
     }
 
+    private final Random random;
+
     public DkproMapper()
     {
         super();
+        this.random = new Random();
     }
 
     @Override
@@ -59,6 +69,23 @@ public class DkproMapper
         throws IOException
     {
         final CAS aCAS = value.getCAS();
+
+        if (samplingPropability != 100)
+            if (random.nextInt(100) >= samplingPropability) {
+                reporter.incrCounter("uima", "sampling: SKIPPED", 1);
+                return;
+            }
+        reporter.incrCounter("uima", "sampling: NOT SKIPPED", 1);
+
+        // if the input has a different type as the desired out, instanciate a new one;
+
+        if (!(value.getClass().equals(this.outputValueClass)))
+            try {
+                value = (CASWritable) outputValueClass.newInstance();
+            }
+            catch (Exception e1) {
+                throw new RuntimeException(e1);
+            }
         try {
             // let uima process the cas
             final ProcessTrace result = this.engine.process(aCAS);
@@ -67,8 +94,9 @@ public class DkproMapper
             }
             final Text outkey = getOutputKey(key, aCAS);
             value.setCAS(aCAS);
-            reporter.incrCounter("uima", "overall doc size", value.getCAS().getDocumentText()
-                    .length());
+            if (aCAS.getDocumentText() != null)
+                reporter.incrCounter("uima", "overall doc size", value.getCAS().getDocumentText()
+                        .length());
             output.collect(outkey, value);
         }
         catch (final AnalysisEngineProcessException e) {
@@ -90,6 +118,13 @@ public class DkproMapper
     protected Text getOutputKey(Text key, CAS aCAS)
     {
         return key;
+    }
+
+    @Override
+    AnalysisEngineDescription getEngineDescription(EngineFactory factory, JobConf job)
+        throws ResourceInitializationException
+    {
+        return factory.buildMapperEngine(job);
     }
 
 }

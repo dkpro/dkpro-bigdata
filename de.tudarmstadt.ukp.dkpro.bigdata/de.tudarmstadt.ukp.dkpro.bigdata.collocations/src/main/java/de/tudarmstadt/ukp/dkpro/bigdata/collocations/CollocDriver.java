@@ -33,6 +33,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
@@ -149,8 +150,8 @@ public final class CollocDriver
         }
         log.info("Association Metric: {}", metric);
         Window windowType = Window.SENTENCE;
-        if (getOption("windowType") != null) {
-            windowType = Window.valueOf(getOption("windowType").toUpperCase());
+        if (getOption("windowMode") != null) {
+            windowType = Window.valueOf(getOption("windowMode").toUpperCase());
         }
         int windowSize = 3;
         if (getOption("windowSize") != null) {
@@ -164,20 +165,19 @@ public final class CollocDriver
                 maxNGramSize, reduceTasks, minSupport, windowType, windowSize);
 
         // tally collocations and perform LLR calculation
-        for (String m : metric.split(",")) {
-            log.info("Computing Collocations with Association Metric: {}", m);
-            // extract pruning thresholds
-            if (m.contains(":")) {
-                String[] tokens = m.split(":");
-                m = tokens[0];
-                minValue = Float.parseFloat(tokens[1]);
-            }
+        // for (String m : metric.split(",")) {
+        // log.info("Computing Collocations with Association Metric: {}", m);
+        // // extract pruning thresholds
+        // if (m.contains(":")) {
+        // String[] tokens = m.split(":");
+        // m = tokens[0];
+        // minValue = Float.parseFloat(tokens[1]);
+        // }
 
-            computeNGramsPruneByLLR(output, getConf(), ngramCount, emitUnigrams, minValue,
-                    reduceTasks, m);
-            // only emit unigrams for the first metric
-            emitUnigrams = false;
-        }
+        computeNGramsPruneByLLR(output, getConf(), ngramCount, emitUnigrams, minValue, reduceTasks);
+        // only emit unigrams for the first metric
+        emitUnigrams = false;
+        // }
         return 0;
     }
 
@@ -209,8 +209,7 @@ public final class CollocDriver
                 reduceTasks, minSupport, windowMode, windowSize);
 
         // tally collocations and perform LLR calculation
-        computeNGramsPruneByLLR(output, baseConf, ngramCount, true, minLLRValue, reduceTasks,
-                metric);
+        computeNGramsPruneByLLR(output, baseConf, ngramCount, true, minLLRValue, reduceTasks);
     }
 
     /**
@@ -229,10 +228,22 @@ public final class CollocDriver
         con.set(WINDOW_TYPE, mode.toString());
         con.setInt(WINDOW_SIZE, winsize);
 
-        con.setInt("mapred.job.map.memory.mb", 6000);
-        con.set("mapred.child.java.opts", "-Xmx5900M");
-        con.set("mapred.reduce.child.java.opts", "-Xmx5000M");
-        con.setInt("mapred.job.reduce.memory.mb", 5120);
+        if (mode.toString().equalsIgnoreCase("DOCUMENT")) {
+            con.setInt("mapred.job.map.memory.mb", 3000);
+
+            con.set("mapred.child.java.opts", "-Xmx2900M");
+            con.set("mapred.reduce.child.java.opts", "-Xmx8000M");
+
+            con.setInt("mapred.job.reduce.memory.mb", 8120);
+        }
+        else {
+            con.setInt("mapred.job.map.memory.mb", 2000);
+
+            con.set("mapred.child.java.opts", "-Xmx1900M");
+            con.set("mapred.reduce.child.java.opts", "-Xmx2900M");
+
+            con.setInt("mapred.job.reduce.memory.mb", 3000);
+        }
         con.setBoolean("mapred.compress.map.output", true);
         con.setStrings("mapred.map.output.compression.codec",
                 "org.apache.hadoop.io.compress.DefaultCodec");
@@ -242,7 +253,7 @@ public final class CollocDriver
         con.setInt("mapred.task.timeout", 6000000);
         con.setInt("io.sort.factor", 50);
         con.setInt("mapreduce.map.tasks", 256);
-
+        con.setInt("dfs.replication", 1);
         Job job = new Job(con);
         job.setJobName(CollocDriver.class.getSimpleName() + ".generateCollocations:" + input);
         job.setJarByClass(CollocDriver.class);
@@ -279,11 +290,9 @@ public final class CollocDriver
 
     /**
      * pass2: perform the LLR calculation
-     * 
-     * @param metric
      */
     private static void computeNGramsPruneByLLR(Path output, Configuration baseConf,
-            long nGramTotal, boolean emitUnigrams, float minValue, int reduceTasks, String metric)
+            long nGramTotal, boolean emitUnigrams, float minValue, int reduceTasks)
         throws IOException, InterruptedException, ClassNotFoundException
     {
         Configuration conf = new Configuration(baseConf);
@@ -294,11 +303,11 @@ public final class CollocDriver
         conf.setInt("mapred.job.reduce.memory.mb", 2560);
         conf.set("mapred.reduce.child.java.opts", "-Xmx2G");
         conf.setInt("mapred.task.timeout", 6000000);
-        conf.set(AssocReducer.ASSOC_METRIC, metric);
+        conf.set(AssocReducer.ASSOC_METRIC, "llr");
 
         Job job = new Job(conf);
         job.setJobName(CollocDriver.class.getSimpleName() + ".computeNGrams: " + output
-                + ", metric " + metric + ", pruning: " + minValue);
+                + " pruning: " + minValue);
         job.setJarByClass(CollocDriver.class);
 
         job.setMapOutputKeyClass(Gram.class);
@@ -307,7 +316,7 @@ public final class CollocDriver
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(DoubleWritable.class);
         FileInputFormat.setInputPaths(job, new Path(output, SUBGRAM_OUTPUT_DIRECTORY));
-        Path outPath = new Path(output, NGRAM_OUTPUT_DIRECTORY + "_" + metric);
+        Path outPath = new Path(output, NGRAM_OUTPUT_DIRECTORY + "_llr");
         FileOutputFormat.setOutputPath(job, outPath);
 
         job.setMapperClass(Mapper.class);
@@ -316,8 +325,8 @@ public final class CollocDriver
         job.setReducerClass(AssocReducer.class);
         job.setNumReduceTasks(reduceTasks);
         // Defines additional single text based output 'text' for the job
-        // MultipleOutputs.addNamedOutput(job, "contingency", TextOutputFormat.class, Text.class,
-        // Text.class);
+        MultipleOutputs.addNamedOutput(job, "contingency", TextOutputFormat.class, Text.class,
+                Text.class);
 
         // Defines additional multi sequencefile based output 'sequence' for the
         // job
@@ -335,4 +344,5 @@ public final class CollocDriver
             throw new IllegalStateException("Job failed!");
         }
     }
+
 }

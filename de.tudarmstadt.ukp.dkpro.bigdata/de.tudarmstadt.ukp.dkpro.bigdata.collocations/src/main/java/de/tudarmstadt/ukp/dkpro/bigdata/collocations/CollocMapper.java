@@ -21,15 +21,17 @@ import static org.apache.uima.fit.util.JCasUtil.select;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.function.ObjectIntProcedure;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
-import org.apache.tools.ant.filters.StringInputStream;
+
 import org.apache.uima.cas.CASException;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
@@ -47,6 +49,8 @@ import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 import de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Lemma;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
+import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Stem;
+import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 
 /**
  * Pass 1 of the Collocation discovery job which generated ngrams and emits ngrams an their
@@ -66,7 +70,7 @@ public class CollocMapper
 
     public enum Count
     {
-        NGRAM_TOTAL, OVERFLOW, MULTIWORD, EMITTED_UNIGRAM, SENTENCES, LEMMA, DOCSIZE, EMPTYDOC
+        NGRAM_TOTAL, OVERFLOW, MULTIWORD, EMITTED_UNIGRAM, SENTENCES, LEMMA, DOCSIZE, EMPTYDOC, WINDOWS
     }
 
     public enum Window
@@ -90,6 +94,18 @@ public class CollocMapper
 
     private final int MAX_NGRAMS = 5000;
     Pattern pattern = Pattern.compile(".*[\"\'#§$%&:\\+!,-]+.*");
+    Class<? extends Annotation> annotation = Lemma.class;
+
+    /**
+     * Used by FeatureCountHadoopDriver to map each CAS to a set of features, e.g. its n-grams or
+     * cooccurrences.
+     */
+    public interface CountableFeaturePairExtractor
+    {
+        public void configure(JobConf job);
+
+        public void extract(final Context context, final JCas jcas, int lemmaCount);
+    }
 
     /**
      * Collocation finder: pass 1 map phase.
@@ -150,12 +166,12 @@ public class CollocMapper
 
             context.getCounter(Count.DOCSIZE).increment(jcas.getDocumentText().length());
 
-            int count = 0;
             if (this.windowMode == Window.DOCUMENT)
-                count = extractWholeDocument(context, jcas, lemmaCount, count);
+                extractWholeDocument(context, jcas, lemmaCount);
             else if (this.windowMode == Window.SENTENCE)
-
-                count = extractSentence(context, jcas, lemmaCount, count);
+                extractSentence(context, jcas, lemmaCount);
+            else if (this.windowMode == Window.C_WINDOW)
+                extractWindow(context, jcas, lemmaCount);
             // OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount *
             // 4);
             // OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
@@ -177,7 +193,7 @@ public class CollocMapper
             // }
             // }
             // flushCollocations(context, ngrams, unigrams);
-            context.getCounter(Count.NGRAM_TOTAL).increment(count);
+            // context.getCounter(Count.NGRAM_TOTAL).increment(count);
 
         }
         catch (NullPointerException e1) {
@@ -192,12 +208,73 @@ public class CollocMapper
         }
     }
 
-    private int extractSentence(final Context context, final JCas jcas, int lemmaCount, int count)
+    private void extractWindow(org.apache.hadoop.mapreduce.Mapper.Context context, JCas jcas,
+            int lemmaCount)
+    {
+        OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
+        OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
+        int counta = 0;
+        int ngramcount = 0;
+        // int count = collectCooccurencesFromCas(context, jcas, ngrams, unigrams);
+        ArrayList<Lemma> terms = new ArrayList<Lemma>();
+
+        for (final Lemma term : JCasUtil.select(jcas, Lemma.class))
+            terms.add(term);
+        for (int wcount = 0; wcount < (terms.size() / window); wcount++)
+            for (int i = 0; i < window; i++) {
+                if ((wcount * window) + i > terms.size())
+                    break;
+                String termText = terms.get((wcount * window) + i).getValue();
+
+                if (!isValid(termText)) {
+
+                    continue;
+                }
+                int countb = 0;
+                context.getCounter(Count.WINDOWS).increment(1);
+                unigrams.adjustOrPutValue(termText, 1, 1);
+                for (int j = 0; j < window; j++) {
+                    if ((wcount * window) + j > terms.size())
+                        break;
+                    String termText2 = terms.get((wcount * window) + j).getValue();
+                    // // out.set(termText, termText2);
+                    // ngrams.adjustOrPutValue(termText+" "+termText2, 1, 1);
+                    // count++;
+                    if (!isValid(termText2)) {
+                        continue;
+                    }
+
+                    ngrams.adjustOrPutValue(termText + "\t" + termText2, 1, 1);
+
+                    if (ngramcount++ > 10000) {
+                        flushCollocations(context, ngrams, unigrams);
+                        context.getCounter(Count.NGRAM_TOTAL).increment(i);
+                        ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
+                        unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
+                        ngramcount = 0;
+
+                    }
+                    context.getCounter("test", "iteration").increment(1);
+                    if (countb++ > 1000)
+                        break;
+                }
+                if (counta++ > 1000)
+                    break;
+
+            }
+
+        flushCollocations(context, ngrams, unigrams);
+
+        context.getCounter(Count.NGRAM_TOTAL).increment(ngramcount);
+
+    }
+
+    private int extractSentence(final Context context, final JCas jcas, int lemmaCount)
     {
         OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
         OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
         int sentenceCount = 0;
-
+        int count = 0;
         Annotation[] previous = new Annotation[window];
         for (final Annotation sentence : select(jcas, Sentence.class)) {
             for (int j = 0; j < previous.length - 1; j++)
@@ -221,18 +298,74 @@ public class CollocMapper
         return count;
     }
 
-    private int extractWholeDocument(final Context context, final JCas jcas, int lemmaCount,
-            int count)
+    private void extractWholeDocument(final Context context, final JCas jcas, int lemmaCount)
     {
         OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
         OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
-        int sentenceCount = 0;
-        count += collectCooccurencesFromCas(context, jcas, ngrams, unigrams);
+        int counta = 0;
+
+        int i = 0;
+        int j = 0;
+        // int count = collectCooccurencesFromCas(context, jcas, ngrams, unigrams);
+        for (final Lemma term : JCasUtil.select(jcas, Lemma.class)) {
+            String termText = term.getValue();
+
+            POS pos = null;
+            for (POS p : JCasUtil.selectCovered(jcas, POS.class, term))
+                pos = p;
+
+            if (!isValid(termText)) {
+
+                continue;
+            }
+            int countb = 0;
+            unigrams.adjustOrPutValue(termText, 1, 1);
+            for (final Lemma term2 : JCasUtil.select(jcas, Lemma.class)) {
+                final String termText2 = term2.getValue();
+                // // out.set(termText, termText2);
+                // ngrams.adjustOrPutValue(termText+" "+termText2, 1, 1);
+                // count++;
+                if (!isValid(termText2)) {
+                    continue;
+                }
+
+                ngrams.adjustOrPutValue(termText + "\t" + termText2, 1, 1);
+
+                if (i++ > 10000) {
+                    flushCollocations(context, ngrams, unigrams);
+                    context.getCounter(Count.NGRAM_TOTAL).increment(i);
+                    ngrams = new OpenObjectIntHashMap<String>(lemmaCount * 4);
+                    unigrams = new OpenObjectIntHashMap<String>(lemmaCount);
+                    i = 0;
+
+                }
+                context.getCounter("test", "iteration").increment(1);
+                if (countb++ > 1000)
+                    break;
+            }
+            if (counta++ > 1000)
+                break;
+
+        }
 
         flushCollocations(context, ngrams, unigrams);
-        context.getCounter(Count.SENTENCES).increment(sentenceCount);
-        context.getCounter(Count.NGRAM_TOTAL).increment(count);
-        return count;
+
+        context.getCounter(Count.NGRAM_TOTAL).increment(i);
+
+    }
+
+    private String getValue(final Annotation term)
+    {
+
+        if (term instanceof Token)
+            return ((Token) term).getCoveredText().toLowerCase();
+        if (term instanceof Lemma)
+            return ((Lemma) term).getValue().toLowerCase();
+        if (term instanceof Stem)
+            return ((Stem) term).getValue().toLowerCase();
+
+        throw new UnsupportedOperationException("Unknown annotation type "
+                + term.getClass().getCanonicalName());
     }
 
     private void flushCollocations(final Context context, OpenObjectIntHashMap<String> ngrams,
@@ -302,220 +435,15 @@ public class CollocMapper
 
     }
 
-    private int collectCooccurencesFromCasPOS(final Context context, final JCas jcas,
-            OpenObjectIntHashMap<String> ngrams, OpenObjectIntHashMap<String> unigrams)
-    {
-        int count = 0;
-        for (final Sentence sentence : select(jcas, Sentence.class)) {
-
-            int i = 0;
-            int pointer = -1;
-            String[] history1 = new String[3];
-            for (final Lemma term : JCasUtil.selectCovered(jcas, Lemma.class, sentence)) {
-                final String termText = term.getValue().toLowerCase();
-                for (int j = 0; j < history1.length - 1; j++)
-                    history1[j] = history1[j + 1];
-                history1[history1.length - 1] = termText;
-                String mwe = StaticMultiWords.matches(history1);
-                if (mwe != null) {
-                    context.getCounter(Count.MULTIWORD).increment(1);
-                    mwe = mwe + "/MWE";
-                    String[] history2 = new String[3];
-                    unigrams.adjustOrPutValue(mwe, 1, 1);
-                    for (final Lemma term2 : JCasUtil.selectCovered(jcas, Lemma.class, sentence)) {
-                        final String termText2 = term2.getValue().toLowerCase();
-                        for (int j = 0; j < history2.length - 1; j++)
-                            history2[j] = history2[j + 1];
-                        history2[history1.length - 1] = termText2;
-
-                        // // out.set(termText, termText2);
-                        // ngrams.adjustOrPutValue(termText+" "+termText2, 1, 1);
-                        // count++;
-                        if (!isValid(termText2)) {
-                            continue;
-                        }
-                        POS pos2 = null;
-                        for (POS p : JCasUtil.selectCovered(jcas, POS.class, term2))
-                            pos2 = p;
-
-                        String posValue = pos2.getPosValue();
-                        if (posValue.length() > 2)
-                            posValue = posValue.substring(0, 2);
-                        ngrams.adjustOrPutValue(mwe + "\t" + termText2 + "/" + posValue, 1, 1);
-                        String mwe2 = StaticMultiWords.matches(history2);
-                        if (mwe2 != null)
-                            ngrams.adjustOrPutValue(mwe + "\t" + mwe2 + "/mwe", 1, 1);
-
-                        count++;
-                    }
-
-                }
-                POS pos = null;
-                for (POS p : JCasUtil.selectCovered(jcas, POS.class, term))
-                    pos = p;
-
-                if (!isValid(termText)) {
-
-                    continue;
-                }
-                String posValue = pos.getPosValue();
-                if (posValue.length() > 2)
-                    posValue = posValue.substring(0, 2);
-
-                String left = termText + "/" + posValue;
-                unigrams.adjustOrPutValue(left, 1, 1);
-                for (final Lemma term2 : JCasUtil.selectCovered(jcas, Lemma.class, sentence)) {
-                    final String termText2 = term2.getValue().toLowerCase();
-                    // // out.set(termText, termText2);
-                    // ngrams.adjustOrPutValue(termText+" "+termText2, 1, 1);
-                    // count++;
-                    if (!isValid(termText2)) {
-                        continue;
-                    }
-                    POS pos2 = null;
-                    for (POS p : JCasUtil.selectCovered(jcas, POS.class, term2))
-                        pos2 = p;
-                    posValue = pos2.getPosValue();
-                    if (posValue.length() > 2)
-                        posValue = posValue.substring(0, 2);
-
-                    ngrams.adjustOrPutValue(left + "\t" + termText2 + "/" + posValue, 1, 1);
-                    count++;
-
-                }
-                if (i++ > 5000) {
-                    context.getCounter(Count.OVERFLOW).increment(1);
-                    break;
-                }
-
-            }
-
-        }
-        return count;
-    }
-
-    private int collectCooccurencesFromCas(final Context context, JCas jcas,
-            OpenObjectIntHashMap<String> ngrams, OpenObjectIntHashMap<String> unigrams)
-    {
-        int count = 0;
-
-        int i = 0;
-
-        String[] history1 = new String[5];
-
-        for (final Lemma term : JCasUtil.select(jcas, Lemma.class)) {
-            final String termText = term.getValue().toLowerCase();
-            // handle multiword expressions
-            for (int j = 0; j < history1.length - 1; j++)
-                history1[j] = history1[j + 1];
-            history1[history1.length - 1] = termText;
-
-            String mwe = StaticMultiWords.matches(history1);
-            if (mwe != null) {
-                context.getCounter(Count.MULTIWORD).increment(1);
-                String[] history2 = new String[5];
-                unigrams.adjustOrPutValue(mwe, 1, 1);
-                for (final Lemma term2 : JCasUtil.select(jcas, Lemma.class)) {
-                    final String termText2 = term2.getValue().toLowerCase();
-                    for (int j = 0; j < history2.length - 1; j++)
-                        history2[j] = history2[j + 1];
-                    history2[history1.length - 1] = termText2;
-
-                    // // out.set(termText, termText2);
-                    // ngrams.adjustOrPutValue(termText+" "+termText2, 1, 1);
-                    // count++;
-                    if (!isValid(termText2)) {
-                        continue;
-                    }
-
-                    ngrams.adjustOrPutValue(mwe + "\t" + termText2, 1, 1);
-                    String mwe2 = StaticMultiWords.matches(history2);
-                    if (mwe2 != null)
-                        ngrams.adjustOrPutValue(mwe + "\t" + mwe2, 1, 1);
-
-                    count++;
-                }
-
-            }
-
-            if (!isValid(termText)) {
-
-                continue;
-            }
-
-            String left = termText;
-            unigrams.adjustOrPutValue(left, 1, 1);
-            for (final Lemma term2 : JCasUtil.select(jcas, Lemma.class)) {
-                final String termText2 = term2.getValue().toLowerCase();
-                // // out.set(termText, termText2);
-                // ngrams.adjustOrPutValue(termText+" "+termText2, 1, 1);
-                // count++;
-                if (!isValid(termText2)) {
-                    continue;
-                }
-                if (!left.equals(termText2))
-                    ngrams.adjustOrPutValue(left + "\t" + termText2, 1, 1);
-                count++;
-
-            }
-            if (i++ > 10000) {
-                context.getCounter(Count.OVERFLOW).increment(1);
-                return count;
-            }
-
-        }
-
-        return count;
-    }
-
     private int collectCooccurencesFromCoveringAnnotation(final Context context, JCas jcas,
             final Annotation sentence, OpenObjectIntHashMap<String> ngrams,
             OpenObjectIntHashMap<String> unigrams)
     {
         int count = 0;
-
         int i = 0;
-
-        String[] history1 = new String[5];
-        // for (Annotation sentence : sentence3)
         if (sentence != null)
             for (final Lemma term : JCasUtil.selectCovered(jcas, Lemma.class, sentence)) {
                 final String termText = term.getValue().toLowerCase();
-                // handle multiword expressions
-                for (int j = 0; j < history1.length - 1; j++)
-                    history1[j] = history1[j + 1];
-                history1[history1.length - 1] = termText;
-
-                String mwe = StaticMultiWords.matches(history1);
-                if (mwe != null) {
-                    context.getCounter(Count.MULTIWORD).increment(1);
-                    String[] history2 = new String[5];
-                    unigrams.adjustOrPutValue(mwe, 1, 1);
-                    // for (Annotation sentence2 : sentence3)
-                    if (sentence != null)
-                        for (final Lemma term2 : JCasUtil
-                                .selectCovered(jcas, Lemma.class, sentence)) {
-                            final String termText2 = term2.getValue().toLowerCase();
-                            for (int j = 0; j < history2.length - 1; j++)
-                                history2[j] = history2[j + 1];
-                            history2[history1.length - 1] = termText2;
-
-                            // // out.set(termText, termText2);
-                            // ngrams.adjustOrPutValue(termText+" "+termText2, 1, 1);
-                            // count++;
-                            if (!isValid(termText2)) {
-                                continue;
-                            }
-
-                            ngrams.adjustOrPutValue(mwe + "\t" + termText2, 1, 1);
-                            String mwe2 = StaticMultiWords.matches(history2);
-                            if (mwe2 != null)
-                                ngrams.adjustOrPutValue(mwe + "\t" + mwe2, 1, 1);
-
-                            count++;
-                        }
-
-                }
 
                 if (!isValid(termText)) {
 
@@ -537,7 +465,7 @@ public class CollocMapper
                     count++;
 
                 }
-                if (i++ > 100) {
+                if (i++ > 1000) {
                     context.getCounter(Count.OVERFLOW).increment(1);
                     return count;
                 }
@@ -567,15 +495,15 @@ public class CollocMapper
         this.metadata = new ResourceMetaData_impl();
         final Element aElement;
         final XMLParser aParser = org.apache.uima.UIMAFramework.getXMLParser();
-        try {
-
-            this.metadata = aParser.parseResourceMetaData(new XMLInputSource(new StringInputStream(
-                    Metadata.getMetadata()), new File(".")));
-        }
-        catch (final InvalidXMLException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
+        // try {
+        //
+        // this.metadata = aParser.parseResourceMetaData(new XMLInputSource(new StringInputStream(
+        // Metadata.getMetadata()), new File(".")));
+        // }
+        // catch (final InvalidXMLException e1) {
+        // // TODO Auto-generated catch block
+        // e1.printStackTrace();
+        // }
 
         if (log.isInfoEnabled()) {
             // log.info("Max Ngram size is {}", this.maxShingleSize);

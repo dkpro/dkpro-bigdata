@@ -41,7 +41,7 @@ public class AssocReducer
     /** Counter to track why a particlar entry was skipped */
     public enum Skipped
     {
-        EXTRA_HEAD, EXTRA_TAIL, MISSING_HEAD, MISSING_TAIL, LESS_THAN_MIN_VALUE, DICE_CALCULATION_ERROR,
+        EXTRA_HEAD, EXTRA_TAIL, MISSING_HEAD, MISSING_TAIL, LESS_THAN_MIN_VALUE, LLR_CALCULATION_ERROR, CHI_CALCULATION_ERROR, PMI_CALCULATION_ERROR, DICE_CALCULATION_ERROR
     }
 
     private static final Logger log = LoggerFactory.getLogger(AssocReducer.class);
@@ -62,7 +62,8 @@ public class AssocReducer
     private final AssocCallback chiCalculator = new ChiSquareCallback();
     private final AssocCallback diceCalculator = new DiceCallback();
 
-    private MultipleOutputs mos;
+    private MultipleOutputs<?, ?> mos;
+    AssociationMetrics ass = new AssociationMetrics();
 
     /**
      * Perform assoc calculation, input is: k:ngram:ngramFreq v:(h_|t_)subgram:subgramfreq N = ngram
@@ -137,7 +138,7 @@ public class AssocReducer
 
         }
         catch (IllegalArgumentException ex) {
-            context.getCounter(Skipped.DICE_CALCULATION_ERROR).increment(1);
+            context.getCounter(Skipped.LLR_CALCULATION_ERROR).increment(1);
             log.warn(
                     "Problem calculating assoc metric for ngram {}, HEAD {}:{}, TAIL {}:{}, k11/k12/k21/k22: {}/{}/{}/{}",
                     new Object[] { ngram, gram[0], gramFreq[0], gram[1], gramFreq[1] }, ex);
@@ -148,19 +149,48 @@ public class AssocReducer
         }
         else {
 
-            context.getCounter("assoc", "EMITTED NGRAM").increment(1);
+            ass.init(k11, k12, k21, k22);
             mos.write("llr", new Text(ngram.getString()), new DoubleWritable(value));
-            mos.write("pmi", new Text(ngram.getString()),
-                    new DoubleWritable(pmiCalculator.assoc(k11, k12, k21, k22)));
-            mos.write("chi", new Text(ngram.getString()),
-                    new DoubleWritable(chiCalculator.assoc(k11, k12, k21, k22)));
-            mos.write("dice", new Text(ngram.getString()),
-                    new DoubleWritable(diceCalculator.assoc(k11, k12, k21, k22)));
+            try {
+                double pmi = ass.mutual_information();// pmiCalculator.assoc(k11, k12, k21, k22);
+                mos.write("pmi", new Text(ngram.getString()), new DoubleWritable(pmi));
+            }
+            catch (Exception e) {
+                context.getCounter(Skipped.PMI_CALCULATION_ERROR).increment(1);
 
-            // mos.write("contingency", new Text(ngram.getString()), new Text("" + k11 + "\t" + k12
-            // + "\t" + k21 + "\t" + k22));
+            }
+            try {
+
+                double chi = ass.chisquared();// chiCalculator.assoc(k11, k12, k21, k22);
+                mos.write("chi", new Text(ngram.getString()), new DoubleWritable(chi));
+            }
+            catch (Exception e) {
+                context.getCounter(Skipped.CHI_CALCULATION_ERROR).increment(1);
+
+            }
+            try {
+
+                double dice = ass.dice();// diceCalculator.assoc(k11, k12, k21, k22);
+                mos.write("dice", new Text(ngram.getString()), new DoubleWritable(dice));
+            }
+            catch (Exception e) {
+                context.getCounter(Skipped.DICE_CALCULATION_ERROR).increment(1);
+
+            }
+
+            context.getCounter("assoctest", "EMITTED NGRAM").increment(1);
+
+            mos.write("contingency", new Text(ngram.getString()), new Text("" + k11 + "\t" + k12
+                    + "\t" + k21 + "\t" + k22));
 
         }
+    }
+
+    @Override
+    protected void cleanup(Context context)
+        throws IOException, InterruptedException
+    {
+        mos.close();
     }
 
     @Override
@@ -189,7 +219,7 @@ public class AssocReducer
         if (ngramTotal == -1) {
             throw new IllegalStateException("No NGRAM_TOTAL available in job config");
         }
-        mos = new MultipleOutputs(context);
+        mos = new MultipleOutputs<Text, DoubleWritable>(context);
     }
 
     public AssocReducer()

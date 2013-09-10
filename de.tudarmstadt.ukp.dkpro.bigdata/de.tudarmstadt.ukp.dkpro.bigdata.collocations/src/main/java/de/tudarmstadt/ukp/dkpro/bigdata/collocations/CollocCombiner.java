@@ -20,28 +20,33 @@ package de.tudarmstadt.ukp.dkpro.bigdata.collocations;
 import java.io.IOException;
 
 import org.apache.hadoop.mapreduce.Reducer;
+
 ;
 
 /** Combiner for pass1 of the CollocationDriver. Combines frequencies for values for the same key */
-public class CollocCombiner extends Reducer<GramKey, Gram, GramKey, Gram> {
+public class CollocCombiner
+    extends Reducer<GramKey, Gram, GramKey, Gram>
+{
 
-  @Override
-  protected void reduce(GramKey key, Iterable<Gram> values, Context context) throws IOException, InterruptedException {
+    @Override
+    protected void reduce(GramKey key, Iterable<Gram> values, Context context)
+        throws IOException, InterruptedException
+    {
 
-    int freq = 0;
-    Gram value = null;
+        int freq = 0;
+        Gram value = null;
 
-    // accumulate frequencies from values, preserve the last value
-    // to write to the context.
-    for (Gram value1 : values) {
-      value = value1;
-      freq += value.getFrequency();
+        // accumulate frequencies from values, preserve the last value
+        // to write to the context.
+        for (Gram value1 : values) {
+            value = value1;
+            freq += value.getFrequency();
+        }
+
+        if (value != null) {
+            value.setFrequency(freq);
+            context.write(key, value);
+        }
     }
-
-    if (value != null) {
-      value.setFrequency(freq);
-      context.write(key, value);
-    }
-  }
 
 }

@@ -1,85 +1,78 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
+		<parent>
 		<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 		<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
-		<relativePath></relativePath>
 	</parent>
 	<groupId>de.tudarmstadt.ukp.dkpro.bigdata.collocations</groupId>
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.collocations</artifactId>
 	<name>dkpro collocations</name>
 	<description>compute collocations on the cluster</description>
-	<dependencies>
-  			<dependency> 
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>
-				de.tudarmstadt.ukp.dkpro.core.api.segmentation-asl
-			</artifactId>
+  <dependencies>
+  	<dependency> 
+  		<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
+  		<artifactId>
+  			de.tudarmstadt.ukp.dkpro.bigdata.hadoop 
+  		</artifactId> 
+  		<version>0.1.0-SNAPSHOT</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</groupId>
+  		<artifactId>
+  			de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop
+  		</artifactId>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.hadoop</groupId>
+  		<artifactId>hadoop-client</artifactId>
+  		<version>2.0.0-cdh4.3.0</version>
+  		<scope>provided</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+  		<artifactId>
+  			de.tudarmstadt.ukp.dkpro.core.io.text-asl
+  		</artifactId>
+  	</dependency> 	
+  <dependency>
+				<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+				<artifactId>de.tudarmstadt.ukp.dkpro.core.treetagger-bin</artifactId>
+				<version>20130228.0</version>
+			</dependency>	
+  			<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
 			</dependency>
-		<dependency>  
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>
-				de.tudarmstadt.ukp.dkpro.core.api.structure-asl
-			</artifactId>
-						
-			
-		</dependency>
-  	
-    <dependency>
-    	<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-    	<artifactId>
-    		de.tudarmstadt.ukp.dkpro.core.api.io-asl
-    	</artifactId> 
-    
-    </dependency>
-
-    <dependency>
-    	<groupId>junit</groupId>
-    	<artifactId>junit</artifactId>
-    	<version>4.11</version>
-    </dependency>
-
- 
-    <dependency>
-    	<groupId>org.apache.hadoop</groupId>
-    	<artifactId>hadoop-client</artifactId>
-    	<version>2.0.0-cdh4.1.3</version>
-    	<scope>provided</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.apache.mahout</groupId>
-    	<artifactId>mahout-core</artifactId>
-    	<version>0.7-cdh4.1.3</version>
-    	<exclusions>
-    		<exclusion>
-    			<artifactId>jfreechart</artifactId>
-    			<groupId>jfree</groupId>
-    		</exclusion>
-    	</exclusions>
-    </dependency>
-    <dependency>
-    	<groupId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</groupId>
-    	<artifactId>
-    		de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop
-    	</artifactId>
-    	
-    </dependency>
-	</dependencies>
-    <build>
-   
-  <plugins>
-   <plugin> 
+  			<dependency>
+  				<groupId>org.apache.mahout</groupId>
+  				<artifactId>mahout-core</artifactId>
+  				<version>0.7-cdh4.3.0</version>
+  				<exclusions>
+  					<exclusion>
+  						<artifactId>jfreechart</artifactId>
+  						<groupId>jfree</groupId>
+  					</exclusion>
+  				</exclusions>
+  			</dependency>
+  			<dependency>
+  				<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+  				<artifactId>
+  					de.tudarmstadt.ukp.dkpro.core.api.segmentation-asl
+  				</artifactId>
+  			
+  			</dependency>
+  </dependencies><build><plugins>
+     <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.4</version><!--$NO-MVN-MAN-VER$-->
         <executions>
           <execution>
             <id>copy-dependencies</id>
             <phase>package</phase>
             <goals>
-              <goal>copy-dependencies</goal> 
+              <goal>copy-dependencies</goal>
             </goals>
             <configuration>
               <outputDirectory>${project.build.directory}/lib</outputDirectory>
@@ -89,51 +82,42 @@
             </configuration>
           </execution>
         </executions>
-      </plugin> 
-      <plugin>
-	    <groupId>org.apache.maven.plugins</groupId>
-	        <artifactId>maven-compiler-plugin</artifactId>
-		    <configuration>
-		            <source>1.6</source>
-			            <target>1.6</target>
-				            <showDeprecation>true</showDeprecation>
-					            <showWarnings>true</showWarnings>
-							            <fork>true</fork>
-								        </configuration>
-									</plugin>
-  </plugins>
-  <pluginManagement>
-  	<plugins>
-  		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-  		<plugin>
-  			<groupId>org.eclipse.m2e</groupId>
-  			<artifactId>lifecycle-mapping</artifactId>
-  			<version>1.0.0</version>
-  			<configuration>
-  				<lifecycleMappingMetadata>
-  					<pluginExecutions>
-  						<pluginExecution>
-  							<pluginExecutionFilter>
-  								<groupId>
-  									org.apache.maven.plugins
-  								</groupId>
-  								<artifactId>
-  									maven-dependency-plugin
-  								</artifactId>
-  								<versionRange>[2.4,)</versionRange>
-  								<goals>
-  									<goal>copy-dependencies</goal>
-  								</goals>
-  							</pluginExecutionFilter>
-  							<action>
-  								<ignore></ignore>
-  							</action>
-  						</pluginExecution>
-  					</pluginExecutions>
-  				</lifecycleMappingMetadata>
-  			</configuration>
-  		</plugin>
-  	</plugins>
-  </pluginManagement>
-    </build>
+      </plugin>
+      </plugins>
+	<pluginManagement>
+		<plugins>
+			<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+			<plugin>
+				<groupId>org.eclipse.m2e</groupId>
+				<artifactId>lifecycle-mapping</artifactId>
+				<version>1.0.0</version>
+				<configuration>
+					<lifecycleMappingMetadata>
+						<pluginExecutions>
+							<pluginExecution>
+								<pluginExecutionFilter>
+									<groupId>
+										org.apache.maven.plugins
+									</groupId>
+									<artifactId>
+										maven-dependency-plugin
+									</artifactId>
+									<versionRange>
+										[2.5.1,)
+									</versionRange>
+									<goals>
+										<goal>copy-dependencies</goal>
+									</goals>
+								</pluginExecutionFilter>
+								<action>
+									<ignore></ignore>
+								</action>
+							</pluginExecution>
+						</pluginExecutions>
+					</lifecycleMappingMetadata>
+				</configuration>
+			</plugin>
+		</plugins>
+	</pluginManagement>
+</build>
 </project>

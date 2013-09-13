@@ -31,7 +31,10 @@ public class HdfsResourceLoaderLocator
         throws ResourceInitializationException
     {
         try {
-            resolverInstance = new HdfsResourceLoader(new Configuration(), new URI(fileSystem));
+            if (fileSystem == null)
+                new HdfsResourceLoader(new Configuration());
+            else
+                resolverInstance = new HdfsResourceLoader(new Configuration(), new URI(fileSystem));
         }
         catch (URISyntaxException e) {
             throw new ResourceInitializationException(e);

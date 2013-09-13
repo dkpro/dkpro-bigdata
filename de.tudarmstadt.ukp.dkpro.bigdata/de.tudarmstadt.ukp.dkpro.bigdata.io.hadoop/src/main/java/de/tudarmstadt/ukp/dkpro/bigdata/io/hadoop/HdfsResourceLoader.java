@@ -85,35 +85,22 @@ public class HdfsResourceLoader
      */
     public HdfsResourceLoader(Configuration config, URI uri, String user)
     {
-        this.internalFS = true;
+        internalFS = true;
         FileSystem tempFS = null;
-        try {
-            config = new Configuration(true);
-            String defaultfs = config.get("fs.default.name");
-            // This is an ugly hack to force a dfs filesystem without needing to know the actual
-            // resource
 
-            if (defaultfs.equals("file:///"))
-                defaultfs = "hdfs://10.130.21.10:8020/";
-            uri = new URI(defaultfs);
-        }
-        catch (final URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         try {
             if (uri == null) {
                 uri = FileSystem.getDefaultUri(config);
             }
-            tempFS = (StringUtils.hasText(user) ? FileSystem.get(uri, config, user) : FileSystem
+            tempFS = (user != null ? FileSystem.get(uri, config, user) : FileSystem
                     .get(uri, config));
         }
-        catch (final Exception ex) {
+        catch (Exception ex) {
             tempFS = null;
             throw new IllegalStateException("Cannot create filesystem", ex);
         }
         finally {
-            this.fs = tempFS;
+            fs = tempFS;
         }
     }
 

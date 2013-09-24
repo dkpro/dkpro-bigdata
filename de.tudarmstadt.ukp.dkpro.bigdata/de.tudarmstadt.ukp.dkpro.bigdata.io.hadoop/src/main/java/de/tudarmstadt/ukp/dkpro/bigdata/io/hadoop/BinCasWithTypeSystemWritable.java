@@ -20,12 +20,17 @@ package de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.zip.DeflaterInputStream;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
@@ -38,7 +43,7 @@ import static org.apache.uima.cas.impl.Serialization.deserializeCAS;
 import static org.apache.uima.cas.impl.Serialization.serializeCASMgr;
 import static org.apache.uima.cas.impl.Serialization.serializeWithCompression;
 
-public class BinCasWritable
+public class BinCasWithTypeSystemWritable
     extends CASWritable
 {
 
@@ -49,16 +54,28 @@ public class BinCasWritable
         int dataLength = in.readInt();
         byte[] data = new byte[dataLength];
         in.readFully(data);
-
         ByteArrayInputStream bis = new ByteArrayInputStream(data);
+        DataInputStream datis = new DataInputStream(bis);
+        int offset = datis.readInt();
+        TypeSystemImpl ts;
         try {
 
-            deserializeCAS(cas, bis, cas.getTypeSystem(), null);
+            InflaterInputStream iis = new InflaterInputStream(bis);
+
+            ObjectInputStream ois = new ObjectInputStream(iis);
+            CASMgrSerializer casMgrSerializer = (CASMgrSerializer) ois.readObject();
+            ts = casMgrSerializer.getTypeSystem();
+            ts.commit();
+            bis = new ByteArrayInputStream(data, offset + 4, dataLength - 4 - offset);
+            deserializeCAS(cas, bis, ts, null);
         }
         catch (CASRuntimeException e) {
             throw new IOException(e);
         }
         catch (ResourceInitializationException e) {
+            throw new IOException(e);
+        }
+        catch (ClassNotFoundException e) {
             throw new IOException(e);
         }
 
@@ -72,7 +89,7 @@ public class BinCasWritable
         DataOutputStream docOS = new DataOutputStream(aOS);
 
         try {
-
+            writeTypeSystem(cas, docOS);
             serializeWithCompression(cas, docOS, cas.getTypeSystem());
             docOS.flush();
             docOS.close();
@@ -92,4 +109,27 @@ public class BinCasWritable
 
     }
 
+    private void writeTypeSystem(CAS cas, DataOutputStream aOS)
+        throws IOException
+    {
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(512);
+        DeflaterOutputStream dos = new DeflaterOutputStream(bos);
+        ObjectOutputStream typeOS = new ObjectOutputStream(dos);
+
+        CASMgrSerializer casMgrSerializer;
+        try {
+            casMgrSerializer = serializeCASMgr(cas.getJCas().getCasImpl());
+            typeOS.writeObject(casMgrSerializer);
+        }
+        catch (CASException e) {
+            throw new IOException(e);
+        }
+        typeOS.flush();
+        dos.flush();
+        dos.finish();
+        aOS.writeInt(bos.size());
+        bos.writeTo(aOS);
+        aOS.flush();
+    }
 }

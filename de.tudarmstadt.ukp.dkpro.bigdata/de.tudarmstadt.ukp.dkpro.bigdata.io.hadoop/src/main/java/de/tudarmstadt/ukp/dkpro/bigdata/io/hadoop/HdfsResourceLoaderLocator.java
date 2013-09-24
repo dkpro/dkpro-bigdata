@@ -32,7 +32,7 @@ public class HdfsResourceLoaderLocator
     {
         try {
             if (fileSystem == null)
-                new HdfsResourceLoader(new Configuration());
+                new HdfsResourceLoader(new Configuration(true));
             else
                 resolverInstance = new HdfsResourceLoader(new Configuration(), new URI(fileSystem));
         }

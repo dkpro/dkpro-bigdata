@@ -41,6 +41,7 @@ import org.apache.uima.collection.CollectionReader;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 
+import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.BinCasWithTypeSystemWritable;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.BinCasWritable;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritableSequenceFileWriter;
@@ -207,9 +208,9 @@ public abstract class DkproHadoopDriver
         }
         // this.job.setOutputFormat(TextOutputFormat.class);
         this.job.setMapOutputKeyClass(Text.class);
-        this.job.setMapOutputValueClass(BinCasWritable.class);
+        this.job.setMapOutputValueClass(BinCasWithTypeSystemWritable.class);
         this.job.setOutputKeyClass(Text.class);
-        this.job.setOutputValueClass(BinCasWritable.class);
+        this.job.setOutputValueClass(BinCasWithTypeSystemWritable.class);
         this.job.setJobName(this.getClass().getSimpleName());
         // this.job.set("mapred.child.java.opts", "-Xmx1g");
         this.job.setInt("mapred.job.map.memory.mb", 1280);

@@ -46,28 +46,37 @@ import static org.apache.uima.cas.impl.Serialization.serializeWithCompression;
 public class BinCasWithTypeSystemWritable
     extends CASWritable
 {
+    TypeSystemImpl ts = null;
 
     @Override
     public void readFields(DataInput in)
         throws IOException
     {
-        int dataLength = in.readInt();
-        byte[] data = new byte[dataLength];
-        in.readFully(data);
-        ByteArrayInputStream bis = new ByteArrayInputStream(data);
-        DataInputStream datis = new DataInputStream(bis);
-        int offset = datis.readInt();
-        TypeSystemImpl ts;
+        ByteArrayInputStream bis = null;
+        DataInputStream datis = null;
+        InflaterInputStream iis = null;
+        ObjectInputStream ois = null;
         try {
+            int dataLength = in.readInt();
+            byte[] data = new byte[dataLength];
+            in.readFully(data);
+            bis = new ByteArrayInputStream(data);
+            datis = new DataInputStream(bis);
+            int offset = datis.readInt();
+            datis.close();
 
-            InflaterInputStream iis = new InflaterInputStream(bis);
+            iis = new InflaterInputStream(bis);
 
-            ObjectInputStream ois = new ObjectInputStream(iis);
-            CASMgrSerializer casMgrSerializer = (CASMgrSerializer) ois.readObject();
-            ts = casMgrSerializer.getTypeSystem();
-            ts.commit();
+            ois = new ObjectInputStream(iis);
+            if (ts == null) {
+                CASMgrSerializer casMgrSerializer = (CASMgrSerializer) ois.readObject();
+                ts = casMgrSerializer.getTypeSystem();
+                ts.commit();
+            }
+            bis.close();
             bis = new ByteArrayInputStream(data, offset + 4, dataLength - 4 - offset);
             deserializeCAS(cas, bis, ts, null);
+
         }
         catch (CASRuntimeException e) {
             throw new IOException(e);
@@ -77,6 +86,13 @@ public class BinCasWithTypeSystemWritable
         }
         catch (ClassNotFoundException e) {
             throw new IOException(e);
+        }
+        finally {
+            ois.close();
+            iis.close();
+            datis.close();
+            bis.close();
+
         }
 
     }

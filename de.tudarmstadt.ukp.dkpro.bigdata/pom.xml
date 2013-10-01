@@ -5,6 +5,7 @@
                 <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
                 <artifactId>dkpro-parent-pom</artifactId>
                 <version>6</version>
+                <relativePath></relativePath>
         </parent>
 	<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>

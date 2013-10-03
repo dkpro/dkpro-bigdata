@@ -54,11 +54,6 @@
   			de.tudarmstadt.ukp.dkpro.core.io.text-asl
   		</artifactId>
   	</dependency> 	
-  <dependency>
-				<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-				<artifactId>de.tudarmstadt.ukp.dkpro.core.treetagger-bin</artifactId>
-				<version>20130228.0</version>
-			</dependency>	
   			
   			<dependency>
   				<groupId>org.apache.mahout</groupId>

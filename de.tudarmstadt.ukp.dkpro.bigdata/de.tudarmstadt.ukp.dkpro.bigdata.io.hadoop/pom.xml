@@ -91,4 +91,36 @@
 		    <version>${hadoop.version}</version>
 		</dependency>
 	</dependencies>
+	<build>
+	<plugins>
+	<plugin>
+						<groupId>org.apache.rat</groupId>
+						<artifactId>apache-rat-plugin</artifactId>
+				
+								<configuration>
+									<excludes>
+										<exclude>.gitignore</exclude>
+										<exclude>pom.xml</exclude>
+										<!-- maven config files -->
+										<exclude>src/filter/**/*</exclude>
+										<!-- release generated artifact -->
+										<exclude>release.properties</exclude>
+										<exclude>CHANGES</exclude>
+										<exclude>LICENCE.txt</exclude>
+										<exclude>MANIFEST.MF</exclude>
+										<exclude>NOTICE.txt</exclude>
+										<exclude>README.txt</exclude>
+										<exclude>src/main/resources/**/*</exclude>
+										<exclude>src/test/resources/**/*</exclude>
+										<!-- generated JCas wrappers -->
+										<exclude>src/main/java/**/type/**/*</exclude>
+										<exclude>build/**</exclude>
+										<exclude>.project</exclude>
+									</excludes>
+								</configuration>
+							
+	</plugin>
+	</plugins>
+	
+	</build>
 </project>

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #*******************************************************************************
 # * Copyright 2012
 # * Ubiquitous Knowledge Processing (UKP) Lab
@@ -16,17 +16,21 @@
 # * See the License for the specific language governing permissions and
 # * limitations under the License.
 # #******************************************************************************/
-TARGET_DIR="colloc"
+#. cluster.config
 HEADNODE=headnode-02
+CLASS=de.tudarmstadt.ukp.dkpro.bigdata.examples.UimaPipelineOnHadoop
+#CLASS=de.tudarmstadt.ukp.experiments.hpz.hadoop.TestCollocBloed
+QUEUE=ukp
+MEMORY=2400
+JAR=de.tudarmstadt.ukp.dkpro.bigdata.examples-0.1.0-SNAPSHOT.jar
+RUN="./run.sh $QUEUE $JAR $CLASS $MEMORY $1 $2"
+TARGET_DIR="/tmp/"$(echo $CLASS$USER$(pwd)|md5sum|cut -f1 -d' ')
 mvn clean
 mvn package
-rm -rf target/lib/*jar
 mvn dependency:copy-dependencies
-scp run.sh $HEADNODE:$TARGET_DIR/
-ssh $HEADNODE "chmod +x $TARGET_DIR/run.sh" 
-rsync -avc target/de.tudarmstadt.ukp.dkpro.bigdata.collocations-0.1.0-SNAPSHOT.jar  $HEADNODE:$TARGET_DIR/
+ssh $HEADNODE mkdir -p $TARGET_DIR
+scp run.sh $HEADNODE:$TARGET_DIR/run.sh
+ssh $HEADNODE chmod +x $TARGET_DIR/run.sh 
+rsync -avc target/*.jar  $HEADNODE:$TARGET_DIR/
 rsync -avc --delete target/lib/* --exclude "hadoop-*.jar" $HEADNODE:$TARGET_DIR/lib/
-RUN="./run.sh de.tudarmstadt.ukp.dkpro.bigdata.collocations.CollocDriver -u --input $1 --output  $2 -wm SENTENCE -ws 3 -minV 3 --metric llr:0  -ow --maxRed 64"
-nohup ssh $HEADNODE "cd $TARGET_DIR;pwd;$RUN" &
-#RUN="./run.sh de.tudarmstadt.ukp.dkpro.hpc.collocations.CollocDriver -u --input wiki_english_tagged --output wikipedia_contingency_moresque_full --metric llr:0  -minV 0.1 -ow --maxRed 64"
-#nohup ssh $HEADNODE "cd $TARGET_DIR;$RUN" &
+nohup ssh $HEADNODE "cd $TARGET_DIR;$RUN" &

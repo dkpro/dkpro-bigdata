@@ -38,6 +38,13 @@ import static org.apache.uima.cas.impl.Serialization.deserializeCAS;
 import static org.apache.uima.cas.impl.Serialization.serializeCASMgr;
 import static org.apache.uima.cas.impl.Serialization.serializeWithCompression;
 
+/**
+ * This Writable serializes the CAS in binary form *without* Typesystem. Use this only when you will
+ * process the files with _exactly_ the same Typesystem again (e.g. for intermediate output.
+ * 
+ * @author zorn
+ * 
+ */
 public class BinCasWritable
     extends CASWritable
 {

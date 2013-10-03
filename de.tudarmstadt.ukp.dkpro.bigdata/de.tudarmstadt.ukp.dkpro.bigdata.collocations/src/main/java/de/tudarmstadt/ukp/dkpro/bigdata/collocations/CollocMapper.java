@@ -224,7 +224,7 @@ public class CollocMapper
             for (int i = 0; i < window; i++) {
                 if ((wcount * window) + i > terms.size())
                     break;
-                String termText = terms.get((wcount * window) + i).getValue();
+                String termText = terms.get((wcount * window) + i).getValue().toLowerCase();
 
                 if (!isValid(termText)) {
 
@@ -236,7 +236,7 @@ public class CollocMapper
                 for (int j = 0; j < window; j++) {
                     if ((wcount * window) + j > terms.size())
                         break;
-                    String termText2 = terms.get((wcount * window) + j).getValue();
+                    String termText2 = terms.get((wcount * window) + j).getValue().toLowerCase();
                     // // out.set(termText, termText2);
                     // ngrams.adjustOrPutValue(termText+" "+termText2, 1, 1);
                     // count++;
@@ -308,7 +308,7 @@ public class CollocMapper
         int j = 0;
         // int count = collectCooccurencesFromCas(context, jcas, ngrams, unigrams);
         for (final Lemma term : JCasUtil.select(jcas, Lemma.class)) {
-            String termText = term.getValue();
+            String termText = term.getValue().toLowerCase();
 
             POS pos = null;
             for (POS p : JCasUtil.selectCovered(jcas, POS.class, term))
@@ -321,7 +321,7 @@ public class CollocMapper
             int countb = 0;
             unigrams.adjustOrPutValue(termText, 1, 1);
             for (final Lemma term2 : JCasUtil.select(jcas, Lemma.class)) {
-                final String termText2 = term2.getValue();
+                final String termText2 = term2.getValue().toLowerCase();
                 // // out.set(termText, termText2);
                 // ngrams.adjustOrPutValue(termText+" "+termText2, 1, 1);
                 // count++;

@@ -91,13 +91,7 @@
       	<plugin>
 						<groupId>org.apache.rat</groupId>
 						<artifactId>apache-rat-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>default</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>check</goal>
-								</goals>
+					
 								<configuration>
 									<excludes>
 										<exclude>.gitignore</exclude>
@@ -117,8 +111,7 @@
 										<exclude>src/main/java/**/type/**/*</exclude>
 									</excludes>
 								</configuration>
-							</execution>
-						</executions>
+
 					</plugin>
 			
       </plugins>

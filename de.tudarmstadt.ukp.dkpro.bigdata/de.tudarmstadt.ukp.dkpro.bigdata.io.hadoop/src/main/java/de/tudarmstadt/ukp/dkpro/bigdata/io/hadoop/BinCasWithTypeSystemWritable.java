@@ -17,6 +17,10 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop;
 
+import static org.apache.uima.cas.impl.Serialization.deserializeCAS;
+import static org.apache.uima.cas.impl.Serialization.serializeCASMgr;
+import static org.apache.uima.cas.impl.Serialization.serializeWithCompression;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -26,9 +30,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.zip.DeflaterInputStream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -38,10 +39,6 @@ import org.apache.uima.cas.CASRuntimeException;
 import org.apache.uima.cas.impl.CASMgrSerializer;
 import org.apache.uima.cas.impl.TypeSystemImpl;
 import org.apache.uima.resource.ResourceInitializationException;
-
-import static org.apache.uima.cas.impl.Serialization.deserializeCAS;
-import static org.apache.uima.cas.impl.Serialization.serializeCASMgr;
-import static org.apache.uima.cas.impl.Serialization.serializeWithCompression;
 
 public class BinCasWithTypeSystemWritable
     extends CASWritable

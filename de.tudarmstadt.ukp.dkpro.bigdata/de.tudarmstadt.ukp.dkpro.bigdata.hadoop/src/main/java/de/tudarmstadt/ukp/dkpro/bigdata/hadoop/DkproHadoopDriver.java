@@ -42,8 +42,6 @@ import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.BinCasWithTypeSystemWritable;
-import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.BinCasWritable;
-import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritableSequenceFileWriter;
 
 /**

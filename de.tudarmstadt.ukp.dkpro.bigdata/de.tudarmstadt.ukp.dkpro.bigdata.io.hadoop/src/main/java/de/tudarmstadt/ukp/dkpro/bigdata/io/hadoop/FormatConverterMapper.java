@@ -19,10 +19,8 @@ package de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop;
 
 import static org.apache.uima.fit.factory.TypeSystemDescriptionFactory.createTypeSystemDescription;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
@@ -31,9 +29,7 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.tools.ant.filters.StringInputStream;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.impl.XCASDeserializer;
-import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.CasCreationUtils;
-import org.xml.sax.SAXException;
 
 /**
  * Converts the old Text-based CAS Files to CASWritables

@@ -191,7 +191,7 @@ public abstract class FeatureCountHadoopDriver
 
         // create symlinks for distributed resources
         DistributedCache.createSymlink(this.job);
-        // sLogger.info("Running job "+job.getJobName());
+            // sLogger.info("Running job "+job.getJobName());
 
         JobClient.runJob(this.job);
 

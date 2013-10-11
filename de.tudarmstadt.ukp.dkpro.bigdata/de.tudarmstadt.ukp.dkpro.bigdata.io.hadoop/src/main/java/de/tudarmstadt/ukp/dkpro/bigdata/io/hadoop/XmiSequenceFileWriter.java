@@ -150,8 +150,7 @@ public class XmiSequenceFileWriter
         final OutputStream docOS = null;
         final OutputStream typeOS = null;
         try {
-            final File docOut;
-            final File typeOut;
+
             final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             XmiCasSerializer.serialize(aJCas.getCas(), byteArrayOutputStream);
 

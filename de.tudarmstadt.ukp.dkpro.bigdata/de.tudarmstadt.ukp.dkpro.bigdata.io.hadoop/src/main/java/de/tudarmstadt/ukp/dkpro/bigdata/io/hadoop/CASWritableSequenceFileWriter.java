@@ -37,7 +37,7 @@ import de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData;
 import de.tudarmstadt.ukp.dkpro.core.api.parameter.ComponentParameters;
 
 /**
- * Write XMI to HDFS sequence files
+ * Write CASes to HDFS sequence files
  * 
  * @author Richard Eckart de Castilho, Hans-Peter Zorn
  */
@@ -75,7 +75,8 @@ public class CASWritableSequenceFileWriter
     private String fileSystemName;
 
     private Writer writer;
-    private int i = 0;;
+    private int i = 0;
+	private CASWritable casWritable;;
 
     @Override
     public void initialize(org.apache.uima.UimaContext context)
@@ -83,7 +84,7 @@ public class CASWritableSequenceFileWriter
     {
         super.initialize(context);
         final Configuration conf = new Configuration(false);
-
+        this.casWritable = new BinCasWithTypeSystemWritable();
         this.path = new File((String) context.getConfigParameterValue(PARAM_PATH));
         conf.set("fs.default.name", this.fileSystemName);
         // Compress Map output
@@ -96,13 +97,6 @@ public class CASWritableSequenceFileWriter
         }
         else
             conf.set("mapred.output.compress", "false");
-
-        // conf.set("mapred.compress.map.output", "true");
-        //
-        // // Compress MapReduce output
-        // conf.set("mapred.output.compression", "org.apache.hadoop.io.compress.SnappyCodec");
-        // // FileOutputFormat.setOutputCompressorClass(conf, SnappyCodec.class);
-
         final String filename = this.path + "/" + "part-00000";
         try {
             final FileSystem fs = FileSystem.get(URI.create(filename), conf);
@@ -139,7 +133,7 @@ public class CASWritableSequenceFileWriter
         String documentKey = createKeyFromDocument(meta);
 
         try {
-            CASWritable casWritable = new BinCasWritable();
+         
             casWritable.setCAS(aJCas.getCas());
             this.writer.append(new Text(documentKey), casWritable);
 

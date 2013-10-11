@@ -197,7 +197,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 		if (this.localFS.exists(results_dir)) {
 			final FileStatus[] content = this.localFS.listStatus(results_dir.makeQualified(this.localFS));
 			for (final FileStatus fileStatus : content) {
-				if (fileStatus.isDir()) {
+				if (fileStatus.isDirectory()) {
 					copyRecursively(fileStatus.getPath(), dest.suffix(fileStatus.getPath().getName()));
 				}
 				else {

@@ -49,7 +49,7 @@ public class DkproReducer
 {
 
     Log logger = LogFactory.getLog("DkproReducer");
-    private int casType;
+  
 
     @Override
     public void reduce(Writable key, Iterator<CASWritable> values,

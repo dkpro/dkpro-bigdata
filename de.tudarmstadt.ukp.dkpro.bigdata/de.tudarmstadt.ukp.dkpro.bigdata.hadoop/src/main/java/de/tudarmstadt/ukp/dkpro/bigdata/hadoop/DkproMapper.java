@@ -24,8 +24,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CAS;
@@ -33,7 +31,6 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.ProcessTrace;
 import org.apache.uima.util.ProcessTraceEvent;
 
-import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.BinCasWritable;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 
 /**

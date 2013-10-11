@@ -160,8 +160,7 @@ public class XCASSequenceFileWriter
         final OutputStream docOS = null;
         final OutputStream typeOS = null;
         try {
-            final File docOut;
-            final File typeOut;
+       
             final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             XCASSerializer.serialize(aJCas.getCas(), byteArrayOutputStream);
             this.writer.append(new Text(relativeDocumentPath),

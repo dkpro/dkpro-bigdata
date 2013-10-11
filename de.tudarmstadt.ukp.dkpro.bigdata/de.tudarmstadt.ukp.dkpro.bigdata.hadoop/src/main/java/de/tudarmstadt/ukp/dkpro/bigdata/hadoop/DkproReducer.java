@@ -65,18 +65,12 @@ public class DkproReducer
                 for (final ProcessTraceEvent event : result.getEvents()) {
                     reporter.incrCounter("uima", "map event " + event.getType(), 1);
                 }
-                CASWritable value;
-                // create a CASWritable of the type as specified by job.setOutputValueClass()
-                try {
-                    value = (CASWritable) outputValueClass.newInstance();
-                }
-                catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                value.setCAS(aCAS);
-                reporter.incrCounter("uima", "overall doc size", value.getCAS().getDocumentText()
+              
+              
+                outValue.setCAS(aCAS);
+                reporter.incrCounter("uima", "overall doc size", outValue.getCAS().getDocumentText()
                         .length());
-                output.collect(key, value);
+                output.collect(key, outValue);
             }
             catch (final AnalysisEngineProcessException e) {
                 reporter.incrCounter("uima", e.toString(), 1);
@@ -92,5 +86,15 @@ public class DkproReducer
         throws ResourceInitializationException
     {
         return factory.buildReducerEngine(job);
+    }
+    @Override
+    public void configure(JobConf job) {
+    	super.configure(job);
+    	try {
+    		// create an output writable of the appropriate type
+			outValue = (CASWritable) job.getOutputValueClass().newInstance();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} 
     }
 }

@@ -56,7 +56,7 @@ public class DkproMapper
     }
 
     private final Random random;
-
+   
     public DkproMapper()
     {
         super();
@@ -77,15 +77,7 @@ public class DkproMapper
             }
         reporter.incrCounter("uima", "sampling: NOT SKIPPED", 1);
 
-        // if the input has a different type as the desired out, instanciate a new one;
-
-        if (!(value.getClass().equals(this.outputValueClass)))
-            try {
-                value = (CASWritable) outputValueClass.newInstance();
-            }
-            catch (Exception e1) {
-                throw new RuntimeException(e1);
-            }
+      
         try {
             // let uima process the cas
             final ProcessTrace result = this.engine.process(aCAS);
@@ -93,11 +85,11 @@ public class DkproMapper
                 reporter.incrCounter("uima", "map event " + event.getType(), 1);
             }
             final Text outkey = getOutputKey(key, aCAS);
-            value.setCAS(aCAS);
+            outValue.setCAS(aCAS);
             if (aCAS.getDocumentText() != null)
-                reporter.incrCounter("uima", "overall doc size", value.getCAS().getDocumentText()
+                reporter.incrCounter("uima", "overall doc size", outValue.getCAS().getDocumentText()
                         .length());
-            output.collect(outkey, value);
+            output.collect(outkey, outValue);
         }
         catch (final AnalysisEngineProcessException e) {
             reporter.incrCounter("uima", e.toString(), 1);
@@ -126,5 +118,15 @@ public class DkproMapper
     {
         return factory.buildMapperEngine(job);
     }
-
+    
+    @Override
+    public void configure(JobConf job) {
+    	super.configure(job);
+    	try {
+    		// create an output writable of the appropriate type
+			outValue = (CASWritable) job.getMapOutputValueClass().newInstance();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} 
+    }
 }

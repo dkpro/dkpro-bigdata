@@ -45,12 +45,12 @@ import org.apache.uima.resource.metadata.ConfigurationParameter;
 import org.apache.uima.resource.metadata.ConfigurationParameterDeclarations;
 import org.apache.uima.resource.metadata.ConfigurationParameterSettings;
 
+import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
+
 public abstract class UIMAMapReduceBase
     extends MapReduceBase
 {
-    protected Class<?> outputValueClass;
-    protected Class<?> mapOutputValueClass;
-
+ 
     private final Log sLogger = LogFactory.getLog(getClass());
     protected AnalysisEngine engine;
     private FileSystem fs;
@@ -62,7 +62,7 @@ public abstract class UIMAMapReduceBase
     protected int failures = 0;
     protected int maxFailures = 100;
     protected int samplingPropability = 100;
-
+    protected CASWritable outValue;
     public UIMAMapReduceBase()
     {
         super();
@@ -75,9 +75,9 @@ public abstract class UIMAMapReduceBase
     public void configure(JobConf job)
     {
         try {
+        	
             this.job = job;
-            this.mapOutputValueClass = job.getMapOutputValueClass();
-            this.outputValueClass = job.getOutputValueClass();
+;
             this.samplingPropability = job.getInt("dkpro.map.samplingratio", 100);
             final EngineFactory engineFactory = (EngineFactory) Class.forName(
                     job.get("dkpro.uima.factory", DkproHadoopDriver.class.getName())).newInstance();

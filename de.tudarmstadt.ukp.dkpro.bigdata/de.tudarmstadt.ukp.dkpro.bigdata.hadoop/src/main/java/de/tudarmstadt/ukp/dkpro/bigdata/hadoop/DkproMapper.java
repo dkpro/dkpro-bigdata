@@ -1,7 +1,6 @@
 /*******************************************************************************
  * Copyright 2012-13
- * TU Darmstadt, UKP Lab
- * with FG Sprachtechnologie
+ * TU Darmstadt, UKP Lab and FG Sprachtechnologie
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +37,7 @@ import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.BinCasWritable;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 
 /**
- * An "intermediate" reducer for building pipelines with M/R. The engine is _NOT_ supposed to be a
+ * A mapper for building pipelines with M/R. The engine is _NOT_ supposed to be a
  * CasConsumer, the resulting cas will be written to HDFS and can be used as input to a Mapper
  * process again.
  * 

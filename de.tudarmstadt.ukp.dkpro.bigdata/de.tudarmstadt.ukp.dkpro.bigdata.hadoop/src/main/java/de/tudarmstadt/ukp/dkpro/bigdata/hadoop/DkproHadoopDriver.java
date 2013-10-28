@@ -60,17 +60,6 @@ public abstract class DkproHadoopDriver
 
     private JobConf job;
 
-    /**
-     * usually the dkproHadoopDriver implementation should also implement EngineFactory, uses less
-     * boilerplate code
-     * 
-     * @return reference to self's class
-     */
-    public Class getEngineFactoryClass()
-    {
-        return this.getClass();
-    };
-
     public abstract Class getInputFormatClass();
 
     /**
@@ -137,7 +126,7 @@ public abstract class DkproHadoopDriver
         final FileSystem fs = FileSystem.get(this.job);
         Class.forName("de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable");
         // set the factory class name
-        this.job.set("dkpro.uima.factory", getEngineFactoryClass().getName());
+        this.job.set("dkpro.uima.factory", this.getClass().getName());
         Path inputPath;
         if (args[0].contains(",")) {
             String[] inputPaths = args[0].split(",");

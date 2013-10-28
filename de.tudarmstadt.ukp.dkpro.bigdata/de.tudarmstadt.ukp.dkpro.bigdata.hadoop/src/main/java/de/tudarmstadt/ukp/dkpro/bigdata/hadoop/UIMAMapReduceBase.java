@@ -185,32 +185,35 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 		this.engine.destroy();
 	}
 
-	/**
-	 * copy a whole directory tree from the local directory on the node back to a directory on hdfs
-	 * 
-	 * @param results_dir
-	 * @param dest
-	 * @throws IOException
-	 */
-	private void copyRecursively(Path results_dir, Path dest) throws IOException {
-		FileSystem.get(this.job).mkdirs(dest);
-		if (this.localFS.exists(results_dir)) {
-			final FileStatus[] content = this.localFS.listStatus(results_dir.makeQualified(this.localFS));
-			for (final FileStatus fileStatus : content) {
-				if (fileStatus.isDirectory()) {
-					copyRecursively(fileStatus.getPath(), dest.suffix(fileStatus.getPath().getName()));
-				}
-				else {
-					FileUtil.copy(
-							this.localFS,
-							fileStatus.getPath(),
-							FileSystem.get(this.job),
-							dest.suffix(fileStatus.getPath().getName()),
-							true,
-							this.job);
-				}
-			}
-			FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job), dest, true, this.job);
-		}
-	}
+    /**
+     * copy a whole directory tree from the local directory on the node back to a directory on hdfs
+     * 
+     * @param results_dir
+     * @param dest
+     * @throws IOException
+     */
+    private void copyRecursively(Path results_dir, Path dest) throws IOException
+    {
+    	// Copy output only if not empty
+        if (this.localFS.exists(results_dir) &&
+        		this.localFS.listFiles(results_dir, false).hasNext()) {
+            FileSystem.get(this.job).mkdirs(dest);
+            final FileStatus[] content = this.localFS.listStatus(results_dir.makeQualified(this.localFS));
+            for (final FileStatus fileStatus : content) {
+                if (fileStatus.isDirectory()) {
+                    copyRecursively(fileStatus.getPath(), dest.suffix(fileStatus.getPath().getName()));
+                }
+                else {
+                    FileUtil.copy(
+                    		this.localFS,
+                    		fileStatus.getPath(),
+                    		FileSystem.get(this.job),
+                            dest.suffix(fileStatus.getPath().getName()),
+                            true,
+                            this.job);
+                }
+            }
+            FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job), dest, true, this.job);
+        }
+    }
 }

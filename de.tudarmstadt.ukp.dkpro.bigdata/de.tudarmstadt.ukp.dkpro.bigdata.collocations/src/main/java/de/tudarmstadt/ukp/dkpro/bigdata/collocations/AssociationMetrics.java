@@ -67,7 +67,7 @@ public class AssociationMetrics
         C1 = o11 + o21;
         C2 = o12 + o22;
         N = R1 + R2;
-        // pre-type convert
+        // pre-type convert, not sure whether this really is necessary, need to benchmark
         r1 = R1;
         r2 = R2;
         c1 = C1;

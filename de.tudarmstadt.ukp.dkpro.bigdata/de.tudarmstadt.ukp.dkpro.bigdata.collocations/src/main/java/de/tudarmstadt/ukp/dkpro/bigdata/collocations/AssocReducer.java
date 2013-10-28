@@ -18,6 +18,8 @@ package de.tudarmstadt.ukp.dkpro.bigdata.collocations;
  */
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
@@ -61,7 +63,7 @@ public class AssocReducer
     private final AssocCallback pmiCalculator = new PMICallback();
     private final AssocCallback chiCalculator = new ChiSquareCallback();
     private final AssocCallback diceCalculator = new DiceCallback();
-
+    private Method metricMethod;
     private MultipleOutputs<?, ?> mos;
     AssociationMetrics ass = new AssociationMetrics();
 
@@ -150,6 +152,18 @@ public class AssocReducer
         else {
 
             ass.init(k11, k12, k21, k22);
+            try {
+				Object invoke = metricMethod.invoke(value, gram);
+			} catch (IllegalArgumentException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IllegalAccessException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InvocationTargetException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
             mos.write("llr", new Text(ngram.getString()), new DoubleWritable(value));
             try {
                 double pmi = ass.mutual_information();// pmiCalculator.assoc(k11, k12, k21, k22);

@@ -23,7 +23,6 @@ package de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -39,7 +38,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
-import org.springframework.util.StringUtils;
 
 /**
  * Spring ResourceLoader over Hadoop FileSystem.

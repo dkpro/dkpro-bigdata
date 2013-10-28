@@ -33,8 +33,8 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.collocations</module>
-     	<module>de.tudarmstadt.ukp.dkpro.bigdata.io.warc</module> 
-		<module>de.tudarmstadt.ukp.dkpro.bigdata.io.redis</module>	 
+     	 
+		<module>de.tudarmstadt.ukp.dkpro.bigdata.io.warc</module>	 
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</module>
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</module>
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.examples</module>

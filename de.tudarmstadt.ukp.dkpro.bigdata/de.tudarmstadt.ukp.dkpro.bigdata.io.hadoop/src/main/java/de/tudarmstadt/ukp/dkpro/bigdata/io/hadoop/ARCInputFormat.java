@@ -15,7 +15,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package de.tudarmstadt.ukp.dkpro.bigdata.io.warc;
+package de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -35,22 +35,23 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
+import org.jwat.arc.ArcHeader;
+import org.jwat.arc.ArcReader;
+import org.jwat.arc.ArcReaderFactory;
+import org.jwat.arc.ArcRecordBase;
 import org.jwat.common.HeaderLine;
+import org.jwat.common.HttpHeader;
 import org.jwat.common.PayloadWithHeaderAbstract;
-import org.jwat.warc.WarcHeader;
-import org.jwat.warc.WarcReader;
-import org.jwat.warc.WarcReaderFactory;
-import org.jwat.warc.WarcRecord;
 
 //import de.uni_leipzig.asv.encodingdetector.utils.EncodingDetector;
 
 /**
- * Creates WARCRecordReader for Crawler archives in WARC format
+ * Creates ARCRecordReader for Crawler archives in ARC format
  * 
  * @author Johannes Simon
  * 
  */
-public class WARCInputFormat
+public class ARCInputFormat
     extends FileInputFormat<Text, CrawlerRecord>
 {
     @Override
@@ -58,25 +59,23 @@ public class WARCInputFormat
             JobConf jobConf, Reporter reporter)
         throws IOException
     {
-        return new WARCRecordReader((FileSplit) inputSplit, jobConf);
+        return new ARCRecordReader((FileSplit) inputSplit, jobConf);
     }
 
     /**
-     * Reads Crawler archives in WARC format
+     * Reads Crawler archives in ARC format
      * 
      * @author Johannes Simon
      * 
      */
-    public static class WARCRecordReader
+    public static class ARCRecordReader
         implements RecordReader<Text, CrawlerRecord>
     {
         private final long start;
         private final long end;
         private final CountingInputStream fsin;
-        WarcReader warcReader = null;
+        ArcReader arcReader = null;
         long lastRecordEnd = -1;
-        private JobConf conf = null;
-
         private final Set<String> contentTypeWhitelist = new HashSet<String>();
 
         /*
@@ -103,10 +102,9 @@ public class WARCInputFormat
          * continue until a record is read that goes past
          * <code>split.getStart() + split.getLength()</code>.
          */
-        public WARCRecordReader(FileSplit split, JobConf jobConf)
+        public ARCRecordReader(FileSplit split, JobConf jobConf)
             throws IOException
         {
-            conf = jobConf;
             start = split.getStart();
             end = start + split.getLength();
             System.out.println("========== " + start + " " + end);
@@ -118,21 +116,21 @@ public class WARCInputFormat
             FileSystem fs = file.getFileSystem(jobConf);
             fsin = new CountingInputStream(new BufferedInputStream(fs.open(split.getPath())));
 
-            warcReader = WarcReaderFactory.getReader(fsin);
+            arcReader = ArcReaderFactory.getReader(fsin);
             // Start with the first valid record after offset "start"
             skipToNextRecord(start);
         }
 
-        private void fillCrawlerRecord(WarcRecord record, CrawlerRecord crawlerRecord)
+        private void fillCrawlerRecord(ArcRecordBase record, CrawlerRecord crawlerRecord)
             throws IOException
         {
             // Fill CrawlerRecord
-            WarcHeader header = record.header;
+            ArcHeader header = record.header;
             // h.warcSegmentOriginIdUrl
-            crawlerRecord.setURL(header.warcTargetUriStr);
+            crawlerRecord.setURL(header.urlStr);
             // Usually ARC records contain the original webpage, including markup
             crawlerRecord.setIsHTML(true);
-            crawlerRecord.setDate(header.warcDate);
+            crawlerRecord.setDate(header.archiveDate);
             // Usually not present in ARC records
             crawlerRecord.setOriginalLanguage(null);
 
@@ -155,11 +153,11 @@ public class WARCInputFormat
         public boolean next(Text key, CrawlerRecord value)
             throws IOException
         {
-            WarcRecord arcRecord = null;
+            ArcRecordBase arcRecord = null;
             boolean atEnd = false;
             long bufferMarkAtEnd = 0;
 
-            while ((arcRecord = warcReader.getNextRecord()) != null) {
+            while ((arcRecord = arcReader.getNextRecord()) != null) {
                 // Check if arcReader has definitely read over end mark when considering that reader
                 // is buffered
                 // (meaning that (fsin.getCount() > end) is true before we've read the last record
@@ -173,47 +171,38 @@ public class WARCInputFormat
                     break;
                 }
                 try {
-                    // Skip meta header (usually first record in archive)
-                    if (arcRecord.header.contentTypeStr.equals("application/warc-fields"))
-                        continue;
-
                     // Make sure only text content is read
-                    if (conf.getBoolean("webcorpus.common.io.warcinputformat.filter-mimetypes",
-                            false)) {
-                        PayloadWithHeaderAbstract payloadHeader = arcRecord.getPayload()
-                                .getPayloadHeaderWrapped();
-                        if (payloadHeader == null)
-                            continue;
-                        HeaderLine contentTypeHeader = payloadHeader.getHeader("Content-Type");
-                        boolean skipContentType = true;
-                        if (contentTypeHeader != null) {
-                            for (String contentType : contentTypeWhitelist)
-                                if (contentTypeHeader.value.startsWith(contentType)) {
-                                    skipContentType = false;
-                                    break;
-                                }
-                        }
-
-                        if (skipContentType)
-                            continue;
+                    PayloadWithHeaderAbstract payloadHeader = arcRecord.getPayload()
+                            .getPayloadHeaderWrapped();
+                    if (payloadHeader == null || !(payloadHeader instanceof HttpHeader))
+                        continue;
+                    HeaderLine contentTypeHeader = payloadHeader.getHeader("Content-Type");
+                    boolean skipContentType = true;
+                    if (contentTypeHeader != null) {
+                        for (String contentType : contentTypeWhitelist)
+                            if (contentTypeHeader.value.startsWith(contentType)) {
+                                skipContentType = false;
+                                break;
+                            }
                     }
+
+                    if (skipContentType)
+                        continue;
 
                     fillCrawlerRecord(arcRecord, value);
                     key.set(value.getURL());
-
-                    // System.out.println("READ");
                     return true;
                 }
                 catch (UnsupportedEncodingException e) {
                     // Skip unreadable records
-                    System.err.println("WARNING: Skipping WARC record (byte offset "
+                    System.err.println("WARNING: Skipping ARC record (byte offset "
                             + fsin.getCount()
                             + ") due to unsupported encoding. The record may contain binary data.");
                 }
                 catch (Exception e) {
                     // Skip any other records that produce exceptions
                     System.err
-                            .println("WARNING: Skipping WARC record due to exception that occured while reading record:");
+                            .println("WARNING: Skipping ARC record due to exception that occured while reading record:");
                     System.err.println(e.getMessage());
                     e.printStackTrace();
                 }
@@ -267,7 +256,7 @@ public class WARCInputFormat
             throws IOException
         {
             // Skip record by record until (position in input stream) >= start
-            while (fsin.getCount() < start && warcReader.getNextRecord() != null) {
+            while (fsin.getCount() < start && arcReader.getNextRecord() != null) {
             }
             ;
 

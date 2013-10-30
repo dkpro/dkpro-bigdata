@@ -77,6 +77,7 @@ public class ARCInputFormat
         ArcReader arcReader = null;
         long lastRecordEnd = -1;
         private final Set<String> contentTypeWhitelist = new HashSet<String>();
+        Configuration conf;
 
         /*
          * ======================== RecordReader Logic ============================
@@ -88,12 +89,13 @@ public class ARCInputFormat
         void configure(Configuration conf)
         {
             String contentTypeWhitelistStr = conf.get(
-                    "webcorpus.documentjob.content-type-whitelist", "text/html");
+                    "dkpro.input.content-type-whitelist", "text/html");
             if (contentTypeWhitelistStr != null) {
                 String[] contentTypes = contentTypeWhitelistStr.replace(" ", "").split(",");
                 for (String ct : contentTypes)
                     contentTypeWhitelist.add(ct);
             }
+            this.conf = conf;
         }
 
         /**
@@ -141,12 +143,20 @@ public class ARCInputFormat
             // otherwise
             // we'll potentially trash our data before we process it.
             byte[] buffer = IOUtils.toByteArray(record.getPayloadContent());
-            final EncodingDetector encodingDetector = new EncodingDetector(buffer);
-
-            // This is the encoding we'll use to decode the bytes into text
-            String encoding = encodingDetector.getBestEncoding();
-            crawlerRecord.setOriginalEncoding(encoding);
-            crawlerRecord.setContent(new String(buffer, encoding));
+            Class<?> encodingDetectorClass = conf.getClass("dkpro.input.encodingdetector", DummyEncodingDetector.class);
+			try {
+				EncodingDetector encodingDetector = (EncodingDetector)encodingDetectorClass.newInstance();
+	            // This is the encoding we'll use to decode the bytes into text
+	            String encoding = encodingDetector.getBestEncoding(buffer);
+	            crawlerRecord.setOriginalEncoding(encoding);
+	            crawlerRecord.setContent(new String(buffer, encoding));
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
 
         @Override

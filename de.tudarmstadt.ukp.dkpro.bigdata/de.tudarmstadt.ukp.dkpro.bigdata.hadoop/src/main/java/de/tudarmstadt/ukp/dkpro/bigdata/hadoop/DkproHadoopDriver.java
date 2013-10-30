@@ -124,8 +124,7 @@ public abstract class DkproHadoopDriver
         }
         this.job = new JobConf(getConf(), DkproHadoopDriver.class);
         final FileSystem fs = FileSystem.get(this.job);
-        Class.forName("de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable");
-        // set the factory class name
+         // set the factory class name
         this.job.set("dkpro.uima.factory", this.getClass().getName());
         Path inputPath;
         if (args[0].contains(",")) {

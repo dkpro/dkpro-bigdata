@@ -17,7 +17,11 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop;
 
-public interface EncodingDetector
+public class DummyEncodingDetector implements EncodingDetector
 {
-    public String getBestEncoding(byte[] data);
+	public String getBestEncoding(byte[] buffer)
+    {
+        return "latin1";
+    }
+
 }

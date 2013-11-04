@@ -81,7 +81,8 @@ public class HdfsResourceLoader
      * @param user
      *            Hadoop user for accessing the file system.
      */
-    public HdfsResourceLoader(Configuration config, URI uri, String user)
+    @SuppressWarnings("resource")
+	public HdfsResourceLoader(Configuration config, URI uri, String user)
     {
         internalFS = true;
         FileSystem tempFS = null;

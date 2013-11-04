@@ -78,7 +78,8 @@ public class CASWritableSequenceFileWriter
     private int i = 0;
 	private CASWritable casWritable;;
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public void initialize(org.apache.uima.UimaContext context)
         throws org.apache.uima.resource.ResourceInitializationException
     {

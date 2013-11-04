@@ -83,7 +83,8 @@ public class XCASSequenceFileWriter
     private Writer writer;
     private int i = 0;;
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public void initialize(org.apache.uima.UimaContext context)
         throws org.apache.uima.resource.ResourceInitializationException
     {

@@ -64,7 +64,8 @@ class HdfsResource
                 URI.create(child))) : new Path(URI.create(parent)), fs);
     }
 
-    HdfsResource(Path path, FileSystem fs)
+    @SuppressWarnings("deprecation")
+	HdfsResource(Path path, FileSystem fs)
     {
         Assert.notNull(path, "a valid path is required");
         Assert.notNull(fs, "non null file system required");

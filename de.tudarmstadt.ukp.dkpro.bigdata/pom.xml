@@ -25,7 +25,7 @@
         </parent>
 	<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<properties>
 	<hadoop.version>2.0.5-alpha</hadoop.version>
 	</properties>
@@ -43,12 +43,12 @@
 			<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 				<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
-				<version>0.1.0</version>
+				<version>0.1.1-SNAPSHOT</version>
 			</dependency> 
 			<dependency>
 				<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 				<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
-				<version>0.1.0</version>
+				<version>0.1.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
@@ -133,7 +133,7 @@
 		<url>https://code.google.com/p/dkpro-bigdata/source/browse/#git</url>
 		<connection>scm:git:https://code.google.com/p/dkpro-bigdata/</connection>
 		<developerConnection>scm:git:https://code.google.com/p/dkpro-bigdata/ </developerConnection>
-	  <tag>de.tudarmstadt.ukp.dkpro.bigdata-0.1.0</tag>
+	  <tag>HEAD</tag>
   </scm>
 	<issueManagement>
 		<system>Google Code</system>

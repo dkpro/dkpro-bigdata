@@ -20,7 +20,7 @@
 	<parent>
 		<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
 		<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-		<version>0.1.0</version>
+		<version>0.1.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent> 
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 			<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>

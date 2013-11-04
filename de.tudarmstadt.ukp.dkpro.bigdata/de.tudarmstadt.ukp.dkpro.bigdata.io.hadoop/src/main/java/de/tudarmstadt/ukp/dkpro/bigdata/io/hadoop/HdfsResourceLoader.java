@@ -225,7 +225,8 @@ public class HdfsResourceLoader
         return results;
     }
 
-    private void doRetrieveMatchingResources(Path rootDir, String subPattern, Set<Resource> results)
+    @SuppressWarnings("deprecation")
+	private void doRetrieveMatchingResources(Path rootDir, String subPattern, Set<Resource> results)
         throws IOException
     {
         if (!this.fs.isFile(rootDir)) {
@@ -243,7 +244,7 @@ public class HdfsResourceLoader
                     final Path p = fileStatus.getPath();
                     String location = p.toUri().getPath();
                     if (location.startsWith(root)) {
-                        location = location.substring(root.length());
+                         location = location.substring(root.length());
                     }
                     if (fileStatus.isDir() && this.pathMatcher.matchStart(subPattern, location)) {
                         doRetrieveMatchingResources(p, subPattern, results);

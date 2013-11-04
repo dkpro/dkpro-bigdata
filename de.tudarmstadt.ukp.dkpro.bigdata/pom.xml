@@ -15,18 +15,17 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	 <parent>
                 <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
                 <artifactId>dkpro-parent-pom</artifactId>
                 <version>6</version>
-                <relativePath></relativePath>
+                <relativePath />
         </parent>
 	<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<properties>
 	<hadoop.version>2.0.5-alpha</hadoop.version>
 	</properties>
@@ -44,12 +43,12 @@
 			<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 				<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
-				<version>0.1.0-SNAPSHOT</version>
+				<version>0.1.0</version>
 			</dependency> 
 			<dependency>
 				<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 				<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
-				<version>0.1.0-SNAPSHOT</version>
+				<version>0.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
@@ -134,7 +133,8 @@
 		<url>https://code.google.com/p/dkpro-bigdata/source/browse/#git</url>
 		<connection>scm:git:https://code.google.com/p/dkpro-bigdata/</connection>
 		<developerConnection>scm:git:https://code.google.com/p/dkpro-bigdata/ </developerConnection>
-	</scm>
+	  <tag>de.tudarmstadt.ukp.dkpro.bigdata-0.1.0</tag>
+  </scm>
 	<issueManagement>
 		<system>Google Code</system>
 		<url>https://code.google.com/p/dkpro-bigdata/issues/list</url>

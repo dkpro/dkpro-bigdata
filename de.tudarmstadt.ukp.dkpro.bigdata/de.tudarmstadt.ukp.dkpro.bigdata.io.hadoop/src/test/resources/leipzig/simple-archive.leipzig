@@ -1,0 +1,6 @@
+<source><location>http://foo.edu:80/a</location><date>2006-06-21</date><user>LSW</user><original_encoding>utf-8</original_encoding><language>en</language></source>
+Hello World 1!!!
+
+<source><location>http://foo.edu:80/b</location><date>2006-06-22</date><user>LSW</user><original_encoding>utf-8</original_encoding><language>en</language></source>
+Hello World 2!!!
+

@@ -47,9 +47,9 @@ public class WARCInputFormatTest extends InputFormatTest {
 	}
 	
 	@Test
-	public void testReadFromStart() throws IOException {
+	public void testReadSimpleArchive() throws IOException {
 		Path filePath = new Path(ARCHIVE_SIMPLE);
-		FileSplit inputSplit = new FileSplit(filePath, 0, 1096, (String[])null);
+		FileSplit inputSplit = new FileSplit(filePath, 0, 2177, (String[])null);
 		
 		WARCRecordReader recordReader = new WARCRecordReader(inputSplit, jobConf);
 		// Archive contains only 2 records. The arc version block is only meta data.
@@ -59,29 +59,10 @@ public class WARCInputFormatTest extends InputFormatTest {
 	final static int offsetInRecord1 = 10;
 	final static int offsetInRecord2 = 792;
 	
-	final static int BIG_INT = 10000;
-	
-	@Test
-	public void testReadParts() throws IOException {
-		Path filePath = new Path(ARCHIVE_SIMPLE);
-		FileSplit inputSplit1 = new FileSplit(filePath, 0, 1, (String[])null);
-		FileSplit inputSplit2 = new FileSplit(filePath, 1, offsetInRecord2, (String[])null);
-		FileSplit inputSplit3 = new FileSplit(filePath, offsetInRecord2, BIG_INT, (String[])null);
-		
-		WARCRecordReader recordReader1 = new WARCRecordReader(inputSplit1, jobConf);
-		WARCRecordReader recordReader2 = new WARCRecordReader(inputSplit2, jobConf);
-		WARCRecordReader recordReader3 = new WARCRecordReader(inputSplit3, jobConf);
-		
-		// Archive contains only 2 records. The arc version block is only meta data.
-		checkNRecordsRemaining(recordReader1, 0);
-		checkNRecordsRemaining(recordReader2, 1);
-		checkNRecordsRemaining(recordReader3, 1);
-	}
-	
 	@Test
 	public void testReadFromOffset1() throws IOException {
 		Path filePath = new Path(ARCHIVE_SIMPLE);
-		FileSplit inputSplit = new FileSplit(filePath, offsetInRecord1, BIG_INT, (String[])null);
+		FileSplit inputSplit = new FileSplit(filePath, offsetInRecord1, 2177, (String[])null);
 		
 		WARCRecordReader recordReader = new WARCRecordReader(inputSplit, jobConf);
 		checkNRecordsRemaining(recordReader, 2);
@@ -90,18 +71,9 @@ public class WARCInputFormatTest extends InputFormatTest {
 	@Test
 	public void testReadFromOffset2() throws IOException {
 		Path filePath = new Path(ARCHIVE_SIMPLE);
-		FileSplit inputSplit = new FileSplit(filePath, offsetInRecord2, BIG_INT, (String[])null);
+		FileSplit inputSplit = new FileSplit(filePath, offsetInRecord2, 2177, (String[])null);
 		
 		WARCRecordReader recordReader = new WARCRecordReader(inputSplit, jobConf);
 		checkNRecordsRemaining(recordReader, 1);
-	}
-	
-	@Test
-	public void testReadSimpleArchiveInSplits() throws IOException {
-		WARCInputFormat inputFormat = new WARCInputFormat();
-		assertEquals(2, readArchiveInSplits(ARCHIVE_SIMPLE, Integer.MAX_VALUE, inputFormat, jobConf));
-		assertEquals(2, readArchiveInSplits(ARCHIVE_SIMPLE, 1000, inputFormat, jobConf));
-		assertEquals(2, readArchiveInSplits(ARCHIVE_SIMPLE, 100, inputFormat, jobConf));
-		assertEquals(2, readArchiveInSplits(ARCHIVE_SIMPLE, 10, inputFormat, jobConf));
 	}
 }

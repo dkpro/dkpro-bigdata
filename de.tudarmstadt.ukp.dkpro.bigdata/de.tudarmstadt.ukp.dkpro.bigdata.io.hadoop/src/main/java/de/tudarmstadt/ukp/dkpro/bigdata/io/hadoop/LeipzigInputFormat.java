@@ -25,8 +25,6 @@ import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Scanner;
-import java.util.regex.MatchResult;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -44,6 +42,7 @@ import org.apache.commons.io.input.CountingInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputSplit;
@@ -74,7 +73,7 @@ public class LeipzigInputFormat extends FileInputFormat<Text, CrawlerRecord> {
 	public static class SourceMetadata {
 
 		private Document doc;
-		
+
 		public SourceMetadata() {
 			// Initialize with valid placeholder meta data XML
 			try {
@@ -83,11 +82,11 @@ public class LeipzigInputFormat extends FileInputFormat<Text, CrawlerRecord> {
 				e.printStackTrace();
 			}
 		}
-		
+
 		public SourceMetadata(String xml) throws SAXException {
 			loadXml(xml);
 		}
-		
+
 		private void loadXml(String xml) throws SAXException {
 
 			if (!xml.contains("<location><![CDATA[")) {
@@ -195,62 +194,86 @@ public class LeipzigInputFormat extends FileInputFormat<Text, CrawlerRecord> {
 			}
 		}
 	}
-	
-    public RecordReader<Text, CrawlerRecord> getRecordReader(InputSplit inputSplit, JobConf jobConf, Reporter reporter) throws IOException {
-        return new LeipzigRecordReader((FileSplit) inputSplit, jobConf);
-    }
-    
-    /**
-     * Reads text corpus entries in Leipzig format
-     * 
-     * @author Johannes Simon
-     *
-     */
-    public static class LeipzigRecordReader implements RecordReader<Text, CrawlerRecord> {
-        private long start;
-        private long end;
-        private CountingInputStream countingIs;
-        private BufferedReader reader;
-        
-        private long nextRecordStart;
-        
-    	private Scanner recordScanner;
-    	private final String RECORD_DELIMITER = "<source>";
-    	private String nextRecord;
-    	private boolean nextRecordIsValid = false;
 
-        private long posInByteStream;
-        private long posInCharStream;
-        
-        private final String FILE_ENCODING = "UTF-8";
+	public RecordReader<Text, CrawlerRecord> getRecordReader(InputSplit inputSplit, JobConf jobConf, Reporter reporter) throws IOException {
+		return new LeipzigRecordReader((FileSplit) inputSplit, jobConf, reporter);
+	}
 
-        /*
-         * ======================== RecordReader Logic ============================
-         */
+	/**
+	 * Reads text corpus entries in Leipzig format
+	 * 
+	 * @author Johannes Simon
+	 *
+	 */
+	public static class LeipzigRecordReader implements RecordReader<Text, CrawlerRecord> {
+		private long start;
+		private long end;
+		private CountingInputStream countingIs;
+		private BufferedReader reader;
 
-        public LeipzigRecordReader(FileSplit split, JobConf jobConf) throws IOException {
-            start = split.getStart();
-            end = start + split.getLength();
-            
-            posInByteStream = start;
-            posInCharStream = 0;
+		private long nextRecordStart;
 
-            // Open the file and seek to the start of the split
-            Path file = split.getPath();
-            FileSystem fs = file.getFileSystem(jobConf);
-            InputStream is = fs.open(split.getPath());
-            countingIs = new CountingInputStream(is);
-            countingIs.skip(start);
-        	recordScanner = new Scanner(countingIs);
-        	recordScanner.useDelimiter(RECORD_DELIMITER);
-            reader = new BufferedReader(new InputStreamReader(countingIs, FILE_ENCODING));
-            // Start with the first valid record after offset "start"
-            while (!nextRecordIsValid && hasNext())
-            	skipToNextRecord(reader);
-        }
-        
-        private boolean parseMetaLine(CrawlerRecord value, String line) {
-        	try {
+		private String currentRecordContent;
+		private String currentRecordHeader;
+		private String nextRecordHeader;
+
+		private long posInByteStream;
+		private long posInCharStream;
+
+		private final String FILE_ENCODING = "UTF-8";
+
+		private FileSplit fileSplit;
+
+		Counter skippedRecordCounter = null;
+
+		/*
+		 * ======================== RecordReader Logic ============================
+		 */
+
+		enum ProcessingErrorCounters {
+			SkippedDueToException
+		}
+
+		public LeipzigRecordReader(FileSplit split, JobConf jobConf) throws IOException {
+			this(split, jobConf, null);
+		}
+
+		public LeipzigRecordReader(FileSplit split, JobConf jobConf, Reporter reporter) throws IOException {
+			// Remember file split instance for debugging purposes
+			fileSplit = split;
+			start = split.getStart();
+			end = start + split.getLength();
+			System.out.println("Initializing input reader for input split:");
+			System.out.println(split);
+
+			if (reporter != null) {
+				skippedRecordCounter = reporter.getCounter(ProcessingErrorCounters.SkippedDueToException);
+			}
+
+			posInByteStream = start;
+			posInCharStream = 0;
+
+			// Open the file and seek to the start of the split
+			Path file = split.getPath();
+			FileSystem fs = file.getFileSystem(jobConf);
+			InputStream is = fs.open(split.getPath());
+			countingIs = new CountingInputStream(is);
+			countingIs.skip(start);
+			reader = new BufferedReader(new InputStreamReader(countingIs, FILE_ENCODING));
+			// Start with the first valid record after offset "start"
+			skipToNextRecord(reader);
+		}
+
+		private boolean parseMetaLine(CrawlerRecord value, String line) {
+			if (line == null) {
+				System.err.println("[LeipzigInputFormat] Warning: Skipping record because extracted meta line is null!");
+				return false;
+			}
+			if (line.contains("\u0000")) {
+				System.out.println("[parseMetaLine] Line contains null character!");
+				System.out.println(line.indexOf('\u0000'));
+			}
+			try {
 				SourceMetadata sm = new SourceMetadata(line);
 				String origUrl = sm.getEntry("location");
 				String url;
@@ -262,11 +285,11 @@ public class LeipzigInputFormat extends FileInputFormat<Text, CrawlerRecord> {
 					url = "null";
 				}
 				value.setURL(url);
-	
+
 				// Original encoding
 				String encoding = sm.getEntry("original_encoding");
 				value.setOriginalEncoding(encoding);
-				
+
 				// Date
 				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 				Date parsedDate = null;
@@ -281,125 +304,107 @@ public class LeipzigInputFormat extends FileInputFormat<Text, CrawlerRecord> {
 					System.err.println("[LeipzigInputFormat] Warning: Record is missing a date.");
 				}
 				value.setDate(parsedDate);
-        	} catch (Exception e) {
-        		System.err.println("[LeipzigInputFormat] Warning: Skipping record because an exception occured while parsing meta line " + line);
-        		System.err.println("[LeipzigInputFormat] Exception details: " + e.getMessage());
-        		return false;
-        	}
-        	
-        	return true;
-        }
-        
+			} catch (Exception e) {
+				System.err.println("[LeipzigInputFormat] Warning: Skipping record because an exception occured while parsing meta line " + line);
+				System.err.println("File split: " + fileSplit);
+				System.err.println("posInCharStream: " + posInCharStream);
+				System.err.println("URL: " + value.getURL());
+				System.err.println("[LeipzigInputFormat] Exception details: " + e.getMessage());
+				if (skippedRecordCounter != null)
+					skippedRecordCounter.increment(1);
+				return false;
+			}
+
+			return true;
+		}
+
 		public static final String LF = System.getProperty("line.separator");
-		
+
 		private boolean hasNext() {
-//			System.out.println("hasNext: " + nextRecordLine + " != null && " + nextRecordStart + " < " + end);
+			//			System.out.println("hasNext: " + nextRecordLine + " != null && " + nextRecordStart + " < " + end);
 			return nextRecordStart >= 0 && nextRecordStart < end;
-		}
-		
-		private String extractMetaLine(String record) {
-        	int metaLineEnd = nextRecord.indexOf("\n");
-			return nextRecord.substring(0, metaLineEnd);
-		}
-		
-		private String extractContent(String record) {
-        	int metaLineEnd = nextRecord.indexOf("\n");
-			return nextRecord.substring(metaLineEnd);
 		}
 
 		public boolean next(Text key, CrawlerRecord value) throws IOException {
 			if (!hasNext())
 				return false;
 
+			skipToNextRecord(reader);
+
 			// Try parsing meta line. If parsing failed, skip to next record, and so on.
-			while (!parseMetaLine(value, extractMetaLine(nextRecord))) {
+			while (!parseMetaLine(value, currentRecordHeader)) {
 				if (hasNext())
 					skipToNextRecord(reader);
 				else
 					return false;
 			}
-        	value.setContent(extractContent(nextRecord));
-	        key.set(value.getURL());
+			value.setContent(currentRecordContent);
+			key.set(value.getURL());
 
-			skipToNextRecord(reader);
-        	
-        	return true;
-        }
+			return true;
+		}
 
-        public Text createKey() {
-            return new Text();
-        }
+		public Text createKey() {
+			return new Text();
+		}
 
-        public CrawlerRecord createValue() {
-            return new CrawlerRecord();
-        }
+		public CrawlerRecord createValue() {
+			return new CrawlerRecord();
+		}
 
-        public long getPos() throws IOException {
-            //return countingIs.getCount();
-        	return posInByteStream;
-        }
+		public long getPos() throws IOException {
+			//return countingIs.getCount();
+			return posInByteStream;
+		}
 
-        public void close() throws IOException {
-            countingIs.close();
-        }
+		public void close() throws IOException {
+			countingIs.close();
+		}
 
-        public float getProgress() throws IOException {
-            return ((float) (getPos() - start)) / ((float) (end - start));
-        }
+		public float getProgress() throws IOException {
+			return ((float) (getPos() - start)) / ((float) (end - start));
+		}
 
-        /*
-         * ======================== ARC Logic ============================
-         */
-        
-        /**
-         * Reads from <code>input</code> until a valid record meta line was read
-         */
-        private boolean skipToNextRecord(BufferedReader input) throws IOException {
-        	return readUntilNextRecord(input, null);
-        }
+		/*
+		 * ======================== ARC Logic ============================
+		 */
 
-        /**
-         * Reads from <code>input</code> until a valid record meta line was read. Everything
-         * else is added to <code>buffer</code>
-         */
-        private boolean readUntilNextRecord(BufferedReader input, StringBuffer buffer) throws IOException {
-        	nextRecordStart = -1;
-        	if (recordScanner.hasNext()) {
-        		nextRecordStart = posInByteStream;
-        		String record = recordScanner.next();
-        		MatchResult m = recordScanner.match();
-        		int recordSizeBytes = record.getBytes("UTF-8").length;
+		private final String UTF8_BOM = "\uFEFF";
 
-        		// Check if we skipped characters
-        		int delimCharsSkipped;
-        		// Scanner flushed its buffer (can be only reason that (m.start() > posInCharStream) always holds)
-        		if (posInCharStream > 0 && m.start() == 0) {
-        			posInCharStream = 0;
-        			// Scanner refills buffer *after* delimiter
-        			delimCharsSkipped = RECORD_DELIMITER.length();
-        		} else {
-        			delimCharsSkipped = (int) (m.start() - posInCharStream);
-        		}
-        		
-        		if (delimCharsSkipped > RECORD_DELIMITER.length()) {
-        			System.err.println("Internal error: Skipped chars other than \"" + RECORD_DELIMITER + "\"");
-        		} else {
-        			try {
-	        		String delimSkipped = RECORD_DELIMITER.substring(RECORD_DELIMITER.length() - delimCharsSkipped);
-	        		posInByteStream += delimSkipped.getBytes("UTF-8").length;
-        			} catch (StringIndexOutOfBoundsException e) {
-        				e.printStackTrace();
-        			}
-        		}
-        		posInCharStream = m.end();
-        		posInByteStream += recordSizeBytes;
-        		nextRecord = RECORD_DELIMITER + record;
-        		nextRecordIsValid = delimCharsSkipped == RECORD_DELIMITER.length();
-        		
-        		return true;
-        	}
-        	
-        	return false;
-        }
-    }
+		/**
+		 * Reads from <code>input</code> until a valid record meta line was read. Everything
+		 * else is added to <code>buffer</code>
+		 */
+		private boolean skipToNextRecord(BufferedReader input) throws IOException {
+			StringBuffer recordBuffer = new StringBuffer();
+			nextRecordStart = -1;
+			// Continue with next record in case exception occurs
+			String line;
+			String recordHeaderFound = null;
+			int newLineBytes = new String("\n").getBytes("UTF-8").length;
+			boolean foundNewRecord = false;
+			while ((line = reader.readLine()) != null) {
+				// BOM fix (its use is discouraged, however it does appear sometimes)
+				if (line.startsWith(UTF8_BOM))
+					line = line.substring(1);
+
+				if (line.startsWith("<source>")) {
+					nextRecordStart = posInByteStream;
+					foundNewRecord = true;
+					recordHeaderFound = line;
+				} else {
+					recordBuffer.append(line);
+				}
+				long lineSizeBytes = line.getBytes("UTF-8").length + newLineBytes;
+				posInByteStream += lineSizeBytes;
+				if (foundNewRecord)
+					break;
+			}
+
+			currentRecordContent = recordBuffer.toString();
+			currentRecordHeader = nextRecordHeader;
+			nextRecordHeader = recordHeaderFound;
+			return foundNewRecord;
+		}
+	}
 }

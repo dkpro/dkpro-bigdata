@@ -16,8 +16,6 @@
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 
 import org.apache.hadoop.fs.Path;
@@ -26,7 +24,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.WARCInputFormat;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.WARCInputFormat.WARCRecordReader;
 
 /**

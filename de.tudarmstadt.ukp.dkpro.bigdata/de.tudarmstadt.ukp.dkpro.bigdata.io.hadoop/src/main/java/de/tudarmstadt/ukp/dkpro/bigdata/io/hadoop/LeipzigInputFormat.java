@@ -393,7 +393,7 @@ public class LeipzigInputFormat extends FileInputFormat<Text, CrawlerRecord> {
 					foundNewRecord = true;
 					recordHeaderFound = line;
 				} else {
-					recordBuffer.append(line);
+					recordBuffer.append(line + "\n");
 				}
 				long lineSizeBytes = line.getBytes("UTF-8").length + newLineBytes;
 				posInByteStream += lineSizeBytes;

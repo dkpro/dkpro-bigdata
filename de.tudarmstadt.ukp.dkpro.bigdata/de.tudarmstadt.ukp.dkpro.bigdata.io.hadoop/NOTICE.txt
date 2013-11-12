@@ -1,0 +1,2 @@
+HdfsResource and HdfsResourceLoader have been taken from the spring-data-hadoop project. Our version fixes a bug when
+looking up directories on hdfs and should probably pushed upstream.

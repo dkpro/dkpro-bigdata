@@ -42,7 +42,6 @@ import org.apache.commons.io.input.CountingInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputSplit;
@@ -195,6 +194,7 @@ public class LeipzigInputFormat extends FileInputFormat<Text, CrawlerRecord> {
 		}
 	}
 
+	@Override
 	public RecordReader<Text, CrawlerRecord> getRecordReader(InputSplit inputSplit, JobConf jobConf, Reporter reporter) throws IOException {
 		return new LeipzigRecordReader((FileSplit) inputSplit, jobConf, reporter);
 	}
@@ -224,7 +224,7 @@ public class LeipzigInputFormat extends FileInputFormat<Text, CrawlerRecord> {
 
 		private FileSplit fileSplit;
 
-		Counter skippedRecordCounter = null;
+		org.apache.hadoop.mapred.Counters.Counter skippedRecordCounter = null;
 
 		/*
 		 * ======================== RecordReader Logic ============================
@@ -325,6 +325,7 @@ public class LeipzigInputFormat extends FileInputFormat<Text, CrawlerRecord> {
 			return nextRecordStart >= 0 && nextRecordStart < end;
 		}
 
+		@Override
 		public boolean next(Text key, CrawlerRecord value) throws IOException {
 			if (!hasNext())
 				return false;
@@ -344,23 +345,28 @@ public class LeipzigInputFormat extends FileInputFormat<Text, CrawlerRecord> {
 			return true;
 		}
 
+		@Override
 		public Text createKey() {
 			return new Text();
 		}
 
+		@Override
 		public CrawlerRecord createValue() {
 			return new CrawlerRecord();
 		}
 
+		@Override
 		public long getPos() throws IOException {
 			//return countingIs.getCount();
 			return posInByteStream;
 		}
 
+		@Override
 		public void close() throws IOException {
 			countingIs.close();
 		}
 
+		@Override
 		public float getProgress() throws IOException {
 			return ((float) (getPos() - start)) / ((float) (end - start));
 		}

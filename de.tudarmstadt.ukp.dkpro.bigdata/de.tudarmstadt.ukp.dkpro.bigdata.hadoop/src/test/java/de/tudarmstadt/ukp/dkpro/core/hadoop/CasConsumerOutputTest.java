@@ -52,10 +52,11 @@ public class CasConsumerOutputTest {
 			System.out.println(Arrays.asList(args));
 			ToolRunner.run(new Configuration(), new CasConsumerOutputPipeline(), args);
 
+			Assert.assertTrue(new File(outputdir, "_SUCCESS").exists());
 			for (File uima_output_attempt_dir : new File(outputdir).listFiles(new FileFilter() {
 				@Override
 				public boolean accept(File pathname) {
-					return pathname.isDirectory();
+					return pathname.isDirectory() && pathname.getName().startsWith("uima_output_attempt");
 				}
 			})) {
 				File output_file = new File(uima_output_attempt_dir, "cas_consumer_output.txt");

@@ -168,7 +168,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 			this.engine.batchProcessComplete();
 			this.engine.collectionProcessComplete();
 			// copy back data
-			copyRecursively(this.results_dir, FileOutputFormat.getWorkOutputPath(this.job));
+			copyDir(this.results_dir, FileOutputFormat.getWorkOutputPath(this.job));
 		}
 		catch (final AnalysisEngineProcessException e) {
 			throw new IOException(e);
@@ -183,28 +183,14 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	 * @param dest
 	 * @throws IOException
 	 */
-	private void copyRecursively(Path results_dir, Path dest) throws IOException
+	private void copyDir(Path results_dir, Path dest) throws IOException
 	{
 		// Copy output only if not empty
 		if (this.localFS.exists(results_dir) &&
 				this.localFS.listFiles(results_dir, false).hasNext()) {
 			FileSystem.get(this.job).mkdirs(dest);
-			// final FileStatus[] content = this.localFS.listStatus(results_dir.makeQualified(this.localFS));
-			// for (final FileStatus fileStatus : content) {
-			// if (fileStatus.isDirectory()) {
-			// copyRecursively(fileStatus.getPath(), dest.suffix(fileStatus.getPath().getName()));
-			// }
-			// else {
-			// FileUtil.copy(
-			// this.localFS,
-			// fileStatus.getPath(),
-			// FileSystem.get(this.job),
-			// dest.suffix(fileStatus.getPath().getName()),
-			// true,
-			// this.job); // !!! this deletes the files the source folder
-			// }
-			// }
-			FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job), dest, true, this.job); // !!! this overwrites the destination folder with the source folder which was emptied before! It also copies the whole directory structure so a manual recursive copying is basically not needed.
+			// copy the whole directory tree
+			FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job), dest, true, this.job);
 		}
 	}
 }

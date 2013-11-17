@@ -124,9 +124,12 @@ extends FileInputFormat<Text, CASWritable>
 				doc = textExtractor.extractDocumentText(keyFrom, valueFrom);
 			cas.setDocumentText(doc.toString());
 			try {
+				// add some simple metadata
 				String key_as_str = keyFrom.toString();
+				String key_abbrev = StringUtils.abbreviate(key_as_str, 50);
 				DocumentMetaData metadata = DocumentMetaData.create(cas);
-				metadata.setDocumentId(String.format("(%d) %s", key_as_str.hashCode(), StringUtils.abbreviate(key_as_str, 50)));
+				metadata.setDocumentTitle(key_abbrev);
+				metadata.setDocumentId(String.format("<%d>%s", key_as_str.hashCode(), key_abbrev));
 			} catch (Exception e) {
 				System.err.println("DocumentMetaData already present.");
 			}

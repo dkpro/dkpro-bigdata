@@ -27,7 +27,7 @@
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
 	<version>0.1.1-SNAPSHOT</version>
 	<properties>
-	<hadoop.version>2.0.5-alpha</hadoop.version>
+	<hadoop.version>2.2.0</hadoop.version>
 	</properties>
 	<packaging>pom</packaging>
 	<modules>

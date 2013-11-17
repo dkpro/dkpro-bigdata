@@ -1,19 +1,11 @@
 /*******************************************************************************
- * Copyright 2012
- * Ubiquitous Knowledge Processing (UKP) Lab
- * Technische Universität Darmstadt
+ * Copyright 2013 Ubiquitous Knowledge Processing (UKP) Lab Technische Universität Darmstadt
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  * 
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
 package de.tudarmstadt.ukp.dkpro.bigdata.hadoop;
 
@@ -27,7 +19,6 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.LocalFileSystem;
@@ -44,9 +35,9 @@ import org.apache.uima.resource.ResourceSpecifier;
 import org.apache.uima.resource.metadata.ConfigurationParameter;
 import org.apache.uima.resource.metadata.ConfigurationParameterDeclarations;
 import org.apache.uima.resource.metadata.ConfigurationParameterSettings;
-import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
-
 import org.apache.uima.util.InvalidXMLException;
+
+import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 
 public abstract class UIMAMapReduceBase extends MapReduceBase {
 	protected Class<?> outputValueClass;
@@ -63,7 +54,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	protected int failures = 0;
 	protected int maxFailures = 100;
 	protected int samplingPropability = 100;
-	 protected CASWritable outValue;
+	protected CASWritable outValue;
 	public UIMAMapReduceBase() {
 		super();
 	}
@@ -177,7 +168,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 			this.engine.batchProcessComplete();
 			this.engine.collectionProcessComplete();
 			// copy back data
-			copyRecursively(this.results_dir, FileOutputFormat.getWorkOutputPath(this.job));
+			copyDir(this.results_dir, FileOutputFormat.getWorkOutputPath(this.job));
 		}
 		catch (final AnalysisEngineProcessException e) {
 			throw new IOException(e);
@@ -185,35 +176,21 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 		this.engine.destroy();
 	}
 
-    /**
-     * copy a whole directory tree from the local directory on the node back to a directory on hdfs
-     * 
-     * @param results_dir
-     * @param dest
-     * @throws IOException
-     */
-    private void copyRecursively(Path results_dir, Path dest) throws IOException
-    {
-    	// Copy output only if not empty
-        if (this.localFS.exists(results_dir) &&
-        		this.localFS.listFiles(results_dir, false).hasNext()) {
-            FileSystem.get(this.job).mkdirs(dest);
-            final FileStatus[] content = this.localFS.listStatus(results_dir.makeQualified(this.localFS));
-            for (final FileStatus fileStatus : content) {
-                if (fileStatus.isDirectory()) {
-                    copyRecursively(fileStatus.getPath(), dest.suffix(fileStatus.getPath().getName()));
-                }
-                else {
-                    FileUtil.copy(
-                    		this.localFS,
-                    		fileStatus.getPath(),
-                    		FileSystem.get(this.job),
-                            dest.suffix(fileStatus.getPath().getName()),
-                            true,
-                            this.job);
-                }
-            }
-            FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job), dest, true, this.job);
-        }
-    }
+	/**
+	 * copy a whole directory tree from the local directory on the node back to a directory on hdfs
+	 * 
+	 * @param results_dir
+	 * @param dest
+	 * @throws IOException
+	 */
+	private void copyDir(Path results_dir, Path dest) throws IOException
+	{
+		// Copy output only if not empty
+		if (this.localFS.exists(results_dir) &&
+				this.localFS.listFiles(results_dir, false).hasNext()) {
+			FileSystem.get(this.job).mkdirs(dest);
+			// copy the whole directory tree
+			FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job), dest, true, this.job);
+		}
+	}
 }

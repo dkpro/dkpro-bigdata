@@ -35,8 +35,7 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
-import org.jwat.common.HeaderLine;
-import org.jwat.common.PayloadWithHeaderAbstract;
+import org.jwat.warc.WarcConstants;
 import org.jwat.warc.WarcHeader;
 import org.jwat.warc.WarcReader;
 import org.jwat.warc.WarcReaderFactory;
@@ -131,7 +130,7 @@ public class WARCInputFormat
             // h.warcSegmentOriginIdUrl
             crawlerRecord.setURL(header.warcTargetUriStr);
             // Usually ARC records contain the original webpage, including markup
-            crawlerRecord.setIsHTML(true);
+            crawlerRecord.setIsHTML(getContentType(record).contains("text/html"));
             crawlerRecord.setDate(header.warcDate);
             // Usually not present in ARC records
             crawlerRecord.setOriginalLanguage(null);
@@ -182,28 +181,30 @@ public class WARCInputFormat
                 }
                 try {
                     // Skip meta header (usually first record in archive)
-                    if (arcRecord.header.contentTypeStr.equals("application/warc-fields"))
+                    if (WarcConstants.RT_WARCINFO.equals(arcRecord.header.warcTypeStr) || !arcRecord.hasPayload())
                         continue;
 
                     // Make sure only text content is read
                     if (conf.getBoolean("dkpro.input.filter-mimetypes",
                             false)) {
-                        PayloadWithHeaderAbstract payloadHeader = arcRecord.getPayload()
-                                .getPayloadHeaderWrapped();
-                        if (payloadHeader == null)
-                            continue;
-                        HeaderLine contentTypeHeader = payloadHeader.getHeader("Content-Type");
+
+                    	// requests etc. are already filtered by mimetype but maybe in the future this needs to be revised
+                    	// if (!(WarcConstants.RT_RESOURCE.equals(arcRecord.header.warcTypeStr) || WarcConstants.RT_RESPONSE.equals(arcRecord.header.warcTypeStr)))
+                    	// continue;
+                    	String contentTypeHeader = getContentType(arcRecord);
+
                         boolean skipContentType = true;
                         if (contentTypeHeader != null) {
                             for (String contentType : contentTypeWhitelist)
-                                if (contentTypeHeader.value.startsWith(contentType)) {
+                                if (contentTypeHeader.contains(contentType)) {
                                     skipContentType = false;
                                     break;
                                 }
                         }
 
-                        if (skipContentType)
+                        if (skipContentType) {
                             continue;
+                        }
                     }
 
                     fillCrawlerRecord(arcRecord, value);
@@ -229,6 +230,14 @@ public class WARCInputFormat
 
             return false;
         }
+        
+		private String getContentType(WarcRecord arcRecord) {
+			String contentTypeHeader = arcRecord.header.contentTypeStr;
+			if (arcRecord.getPayload().getPayloadHeaderWrapped() != null && arcRecord.getPayload().getPayloadHeaderWrapped().getHeader(WarcConstants.FN_CONTENT_TYPE) != null)
+				contentTypeHeader = arcRecord.getPayload().getPayloadHeaderWrapped().getHeader(WarcConstants.FN_CONTENT_TYPE).value;
+			return contentTypeHeader;
+		}
+
 
         @Override
         public Text createKey()

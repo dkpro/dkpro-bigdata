@@ -31,6 +31,7 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
@@ -108,8 +109,10 @@ public abstract class DkproHadoopDriver
     @Override
     public abstract void configure(JobConf job);
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Runs the UIMA pipeline.
+     * 
+     * @return 0 if Hadoop job succeeded, 1 if job failed, 2 if it was killed, otherwise 3
      * 
      * @see org.apache.hadoop.util.Tool#run(java.lang.String[])
      */
@@ -211,7 +214,16 @@ public abstract class DkproHadoopDriver
 
         RunningJob runningJob = JobClient.runJob(this.job);
         runningJob.waitForCompletion();
-        return runningJob.getJobState();
+        int status = runningJob.getJobState();
+        if (status == JobStatus.SUCCEEDED) {
+        	return 0;
+        } else if (status == JobStatus.FAILED) {
+        	return 1;
+        } else if (status == JobStatus.KILLED) {
+        	return 2;
+        } else {
+        	return 3;
+        }
 
     }
 

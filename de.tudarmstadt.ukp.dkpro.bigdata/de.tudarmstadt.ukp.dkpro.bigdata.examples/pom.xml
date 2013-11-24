@@ -32,14 +32,14 @@
   		<artifactId>
   			de.tudarmstadt.ukp.dkpro.bigdata.hadoop
   		</artifactId>
-  		<version>0.1.1-SNAPSHOT</version>
+  		
   	</dependency> 
   	<dependency>
   		<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
   		<artifactId>
   			de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop
   		</artifactId>
-  		<version>0.1.1-SNAPSHOT</version>
+  		
   	</dependency>
   	<dependency>
   		<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
@@ -54,7 +54,12 @@
   		</artifactId>
   		
   	</dependency>
-
+<dependency>
+<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+<artifactId>
+de.tudarmstadt.ukp.dkpro.core.dictionaryannotator-asl
+</artifactId>
+</dependency>
 
   	<dependency>
   		<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
@@ -66,6 +71,12 @@
   		<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
   		<artifactId>
   			de.tudarmstadt.ukp.dkpro.core.snowball-asl
+  		</artifactId>
+  	</dependency>
+  	<dependency>
+  		<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+  		<artifactId>
+  			de.tudarmstadt.ukp.dkpro.core.examples-asl
   		</artifactId>
   	</dependency>
   </dependencies><build><plugins>

@@ -22,6 +22,7 @@ import static org.apache.uima.fit.pipeline.SimplePipeline.runPipeline;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -38,6 +39,7 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.uima.analysis_engine.AnalysisEngine;
+import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReader;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.resource.ResourceInitializationException;
@@ -272,6 +274,12 @@ public abstract class DkproHadoopDriver
         throws ResourceInitializationException
     {
         return null;
+    }
+    
+    @Override
+    public AnalysisEngineDescription buildReducerEngine(Configuration job)
+    		throws ResourceInitializationException {
+    	return null;
     }
 
 }

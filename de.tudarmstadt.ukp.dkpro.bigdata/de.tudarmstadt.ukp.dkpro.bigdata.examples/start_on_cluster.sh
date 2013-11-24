@@ -16,15 +16,9 @@
 # * See the License for the specific language governing permissions and
 # * limitations under the License.
 # #******************************************************************************/
-#. cluster.config
-HEADNODE=headnode-02
-CLASS=de.tudarmstadt.ukp.dkpro.bigdata.examples.UimaPipelineOnHadoop
-#CLASS=de.tudarmstadt.ukp.experiments.hpz.hadoop.TestCollocBloed
-QUEUE=ukp
-MEMORY=2400
-JAR=de.tudarmstadt.ukp.dkpro.bigdata.examples-0.1.0-SNAPSHOT.jar
+. cluster.config
 RUN="./run.sh $QUEUE $JAR $CLASS $MEMORY $1 $2"
-TARGET_DIR="/tmp/"$(echo $CLASS$USER$(pwd)|md5sum|cut -f1 -d' ')
+TARGET_DIR=$CLASS-run
 mvn clean
 mvn package
 mvn dependency:copy-dependencies

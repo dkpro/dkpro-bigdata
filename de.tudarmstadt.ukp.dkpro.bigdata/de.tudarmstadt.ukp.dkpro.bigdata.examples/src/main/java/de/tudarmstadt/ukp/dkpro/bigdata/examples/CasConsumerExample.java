@@ -35,6 +35,7 @@ import de.tudarmstadt.ukp.dkpro.bigdata.hadoop.DkproMapper;
 import de.tudarmstadt.ukp.dkpro.bigdata.hadoop.DkproReducer;
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.Text2CASInputFormat;
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
+import de.tudarmstadt.ukp.dkpro.core.io.text.TextWriter;
 import de.tudarmstadt.ukp.dkpro.core.snowball.SnowballStemmer;
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.dictionaryannotator.DictionaryAnnotator;
@@ -57,11 +58,13 @@ public class CasConsumerExample
         AnalysisEngineDescription tokenizer = createEngineDescription(BreakIteratorSegmenter.class);
         AnalysisEngineDescription stemmer = createEngineDescription(SnowballStemmer.class,
                 SnowballStemmer.PARAM_LANGUAGE, "en");
+        AnalysisEngineDescription writer =  createEngineDescription(TextWriter.class,
+        		TextWriter.PARAM_TARGET_LOCATION,"$dir/");
 //       	AnalysisEngineDescription nameFinder = createEngineDescription(
 //				DictionaryAnnotator.class,
 //				DictionaryAnnotator.PARAM_MODEL_LOCATION, "$dictionary/names.txt",
 //				DictionaryAnnotator.PARAM_ANNOTATION_TYPE, Name.class);
-        return createEngineDescription(tokenizer, stemmer);
+        return createEngineDescription(tokenizer, stemmer,writer);
 
     }  
     public static void main(String[] args) throws Exception
@@ -69,7 +72,7 @@ public class CasConsumerExample
             CasConsumerExample pipeline = new CasConsumerExample();
             pipeline.setMapperClass(DkproMapper.class);
             pipeline.setReducerClass(DkproReducer.class);
-          //  pipeline.registerDataArchive("dictionary", new URI("file:names.txt"));
+         
             ToolRunner.run(new Configuration(), pipeline, args);
     }
 	@Override

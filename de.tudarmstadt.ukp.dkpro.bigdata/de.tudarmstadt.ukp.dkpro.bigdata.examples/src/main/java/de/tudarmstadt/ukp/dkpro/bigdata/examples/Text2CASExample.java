@@ -39,28 +39,29 @@ import de.tudarmstadt.ukp.dkpro.core.snowball.SnowballStemmer;
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.dictionaryannotator.DictionaryAnnotator;
 import de.tudarmstadt.ukp.dkpro.core.examples.type.Name;
+
+
+/**
+ * This example reads plain text files from the HDFS and processes
+ * them using a pipeline
+ * 
+ * When using a special input format, such as Text2CAS, do not use
+ * buildCollectionReader, just use
+ * 
+ * @author hzorn@inovex.de
+ *
+ */
 public class Text2CASExample
     extends DkproHadoopDriver
 {
    
-//    public CollectionReader buildCollectionReader()
-//        throws ResourceInitializationException
-//    {
-//        return createReader(TextReader.class, TextReader.PARAM_SOURCE_LOCATION, "src/test/resources/text",
-//                TextReader.PARAM_PATTERNS, new String[] { INCLUDE_PREFIX + "*.txt" },
-//                TextReader.PARAM_LANGUAGE, "en");
-//
-//    }
-    public AnalysisEngineDescription buildMapperEngine(Configuration job)
+
+	public AnalysisEngineDescription buildMapperEngine(Configuration job)
         throws ResourceInitializationException
     {
         AnalysisEngineDescription tokenizer = createEngineDescription(BreakIteratorSegmenter.class);
         AnalysisEngineDescription stemmer = createEngineDescription(SnowballStemmer.class,
                 SnowballStemmer.PARAM_LANGUAGE, "en");
-//       	AnalysisEngineDescription nameFinder = createEngineDescription(
-//				DictionaryAnnotator.class,
-//				DictionaryAnnotator.PARAM_MODEL_LOCATION, "$dictionary/names.txt",
-//				DictionaryAnnotator.PARAM_ANNOTATION_TYPE, Name.class);
         return createEngineDescription(tokenizer, stemmer);
 
     }  
@@ -69,12 +70,15 @@ public class Text2CASExample
             Text2CASExample pipeline = new Text2CASExample();
             pipeline.setMapperClass(DkproMapper.class);
             pipeline.setReducerClass(DkproReducer.class);
-          //  pipeline.registerDataArchive("dictionary", new URI("file:names.txt"));
             ToolRunner.run(new Configuration(), pipeline, args);
     }
 	@Override
 	public void configure(JobConf job) {
 		job.set("mapreduce.job.queuename", "smalljob");	
+		/*
+		 * Use Text2Cas InputFormat, read texts directly from h
+		 */
+		
 		job.setInputFormat(Text2CASInputFormat.class);
 	}
 	

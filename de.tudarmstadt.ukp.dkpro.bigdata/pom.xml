@@ -19,7 +19,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	 <parent>
                 <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-                <artifactId>dkpro-parent-pom</artifactId>
+                <artifactId>dkpro-parent-pom</artifactId> 
                 <version>6</version>
                 <relativePath />
         </parent>
@@ -27,7 +27,8 @@
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
 	<version>0.1.1-SNAPSHOT</version>
 	<properties>
-	<hadoop.version>2.2.0</hadoop.version>
+<!--  	<hadoop.version>2.0.0-mr1-cdh4.5.0</hadoop.version> -->
+  <hadoop.version>2.2.0</hadoop.version> 
 	</properties>
 	<packaging>pom</packaging>
 	<modules>
@@ -57,7 +58,11 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
-
+	<dependency>
+		<groupId>org.apache.hadoop</groupId>
+		<artifactId>hadoop-client</artifactId>
+		<version>${hadoop.version}</version>
+		</dependency>
 			
 			<dependency>
 				<groupId>log4j</groupId>
@@ -148,7 +153,18 @@
 			</extension>
 		</extensions>
 	</build>
-
+<repositories>
+<repository>
+  <id>maven-hadoop</id>
+  <name>Hadoop Releases</name>
+  <url>https://repository.cloudera.com/content/repositories/releases/</url>
+</repository>
+  <repository>
+  <id>cloudera-repos</id>
+  <name>Cloudera Repos</name>
+  <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+</repository>
+</repositories>
 	<!-- <distributionManagement>
 		<repository>
 			<id>ukp-oss</id>

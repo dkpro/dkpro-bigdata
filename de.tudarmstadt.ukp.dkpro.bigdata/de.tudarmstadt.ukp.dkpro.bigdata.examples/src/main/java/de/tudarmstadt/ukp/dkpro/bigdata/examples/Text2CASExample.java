@@ -48,7 +48,7 @@ import de.tudarmstadt.ukp.dkpro.core.examples.type.Name;
  * When using a special input format, such as Text2CAS, do not use
  * buildCollectionReader, just use
  * 
- * @author hzorn@inovex.de
+ * @author hpzorn@gmail.com
  *
  */
 public class Text2CASExample

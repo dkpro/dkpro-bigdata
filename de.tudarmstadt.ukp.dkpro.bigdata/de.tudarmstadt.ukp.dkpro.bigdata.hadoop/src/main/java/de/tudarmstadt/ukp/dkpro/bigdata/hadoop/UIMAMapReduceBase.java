@@ -82,7 +82,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 					job.getLocalPath(this.working_dir.getName()));
 			this.localFS.mkdirs(this.results_dir);
 			final String[] resources = job.get("dkpro.resources", "").split(",");
-			System.err.println("Writing local data to: " + this.results_dir);
+			sLogger.info("Writing local data to: " + this.results_dir);
 			this.resourceURIs = new TreeMap<String, URL>();
 			for (final String resource : resources) {
 				final URL r = job.getResource(resource);
@@ -147,7 +147,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 				 */
 				for (final Entry<String, URL> resource : this.resourceURIs.entrySet()) {
 					if (((String) parameterValue).contains("$" + resource.getKey())) {
-						System.out.println(
+						sLogger.info(
 								"replaced $" +
 										resource.getKey() +
 										" in " +

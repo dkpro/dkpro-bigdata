@@ -77,14 +77,13 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable> {
 
 	/**
 	 * Provide a custom implementation of this interface if you want the
-	 * generated CAS instances to contain text different from the value of
+	 * generated CAS instances to have metadata different from the value of
 	 * <Text, Text> key/value lines in the input files.<br>
 	 * <br>
-	 * This is useful e.g. if you want to remove HTML markup or if you want to
-	 * extract text from the <b>key</b>, not from the <b>value</b>.<br>
-	 * <br>
-	 * By default, i.e. if you do not set a custom DocumentTextExtractor, the
-	 * input line's value is used as the CAS document text.
+	 * This is useful e.g. if you want to set the language or the URI of the
+	 * document <br>
+	 * By default, i.e. if you do not set a custom DocumentMetadataExtractor,
+	 * the documentId and documentTitle are generated from the key/value pair
 	 */
 	public interface DocumentMetadataExtractor {
 		void extractDocumentMetaData(Text key, Text value,
@@ -93,14 +92,14 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable> {
 
 	/**
 	 * Tells Text2CASInputFormat to use a custom implementation of
-	 * DocumentTextExtractor. <br>
-	 * By default, i.e. if you do not set a custom DocumentTextExtractor, the
-	 * input line's value is used as the CAS document text.
+	 * DocumentMetadataExtractor. <br>
+	 * By default, i.e. if you do not set a custom DocumentMetadataExtractor,
+	 * the documentId and documentTitle are generated from the key/value pair
 	 * 
 	 * @param conf
 	 *            Configuration object
 	 * @param extractorClass
-	 *            Implementation of DocumentTextExtractor
+	 *            Implementation of DocumentMetadataExtractor
 	 */
 	public static void setDocumentMetadataExtractorClass(Configuration conf,
 			Class<? extends DocumentMetadataExtractor> extractorClass) {

@@ -55,11 +55,14 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	protected int maxFailures = 100;
 	protected int samplingPropability = 100;
 	protected CASWritable outValue;
+
 	public UIMAMapReduceBase() {
 		super();
 	}
 
-	abstract AnalysisEngineDescription getEngineDescription(EngineFactory factory, JobConf job) throws ResourceInitializationException;
+	abstract AnalysisEngineDescription getEngineDescription(
+			EngineFactory factory, JobConf job)
+			throws ResourceInitializationException;
 
 	@Override
 	public void configure(JobConf job) {
@@ -67,21 +70,27 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 			this.job = job;
 			this.mapOutputValueClass = job.getMapOutputValueClass();
 			this.outputValueClass = job.getOutputValueClass();
-			this.samplingPropability = job.getInt("dkpro.map.samplingratio", 100);
-			final EngineFactory engineFactory = (EngineFactory) Class.forName(job.get("dkpro.uima.factory", DkproHadoopDriver.class.getName())).newInstance();
+			this.samplingPropability = job.getInt("dkpro.map.samplingratio",
+					100);
+			final EngineFactory engineFactory = (EngineFactory) Class.forName(
+					job.get("dkpro.uima.factory",
+							DkproHadoopDriver.class.getName())).newInstance();
 			engineFactory.configure(job);
 
-			final AnalysisEngineDescription engineDescription = getEngineDescription(engineFactory, job);
+			final AnalysisEngineDescription engineDescription = getEngineDescription(
+					engineFactory, job);
 
 			// replace the $dir variable within the configuration.
 			this.fs = FileSystem.get(job);
 			this.localFS = FileSystem.getLocal(job);
-			this.working_dir = new Path("uima_output_" + job.get("mapred.task.id"));
+			this.working_dir = new Path("uima_output_"
+					+ job.get("mapred.task.id"));
 			final Path outputPath = FileOutputFormat.getOutputPath(job);
 			this.results_dir = this.fs.startLocalOutput(outputPath,
 					job.getLocalPath(this.working_dir.getName()));
 			this.localFS.mkdirs(this.results_dir);
-			final String[] resources = job.get("dkpro.resources", "").split(",");
+			final String[] resources = job.get("dkpro.resources", "")
+					.split(",");
 			sLogger.info("Writing local data to: " + this.results_dir);
 			this.resourceURIs = new TreeMap<String, URL>();
 			for (final String resource : resources) {
@@ -94,8 +103,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 			replaceRecursively(engineDescription);
 			this.engine = createEngine(engineDescription);
 
-		}
-		catch (final Exception e) {
+		} catch (final Exception e) {
 			sLogger.fatal("Error while configuring pipeline", e);
 			e.printStackTrace();
 			throw new RuntimeException(e);
@@ -104,58 +112,72 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	}
 
 	/**
-	 * Search for primitive engineDescriptions and replace some variables in parameters.
+	 * Search for primitive engineDescriptions and replace some variables in
+	 * parameters.
 	 * 
 	 * Search also in nested engineDescriptions
 	 * 
 	 * @param engineDescription
 	 * @throws InvalidXMLException
 	 */
-	private void replaceRecursively(AnalysisEngineDescription engineDescription) throws InvalidXMLException {
-		AnalysisEngineMetaData analysisEngineMetaData = engineDescription.getAnalysisEngineMetaData();
-		ConfigurationParameterDeclarations configurationParameterDeclarations = analysisEngineMetaData.getConfigurationParameterDeclarations();
+	private void replaceRecursively(AnalysisEngineDescription engineDescription)
+			throws InvalidXMLException {
+		AnalysisEngineMetaData analysisEngineMetaData = engineDescription
+				.getAnalysisEngineMetaData();
+		ConfigurationParameterDeclarations configurationParameterDeclarations = analysisEngineMetaData
+				.getConfigurationParameterDeclarations();
 
 		if (engineDescription.isPrimitive()) { // anchor
-			replaceVariables(analysisEngineMetaData, configurationParameterDeclarations);
+			replaceVariables(analysisEngineMetaData,
+					configurationParameterDeclarations);
 			return;
 		}
 
-		for (final Entry<String, ResourceSpecifier> e : engineDescription.getDelegateAnalysisEngineSpecifiers().entrySet())
+		for (final Entry<String, ResourceSpecifier> e : engineDescription
+				.getDelegateAnalysisEngineSpecifiers().entrySet())
 			replaceRecursively((AnalysisEngineDescription) e.getValue());
 	}
 
 	/**
-	 * Replace variables in the UIMA-Engines configuration to use the resources provides by hadoop.
+	 * Replace variables in the UIMA-Engines configuration to use the resources
+	 * provides by hadoop.
 	 * 
 	 * @param analysisEngineMetaData
 	 * @param configurationParameterDeclarations
 	 */
-	private void replaceVariables(AnalysisEngineMetaData analysisEngineMetaData, ConfigurationParameterDeclarations configurationParameterDeclarations) {
-		for (final ConfigurationParameter parameter : configurationParameterDeclarations.getConfigurationParameters()) {
-			final ConfigurationParameterSettings configurationParameterSettings = analysisEngineMetaData.getConfigurationParameterSettings();
-			final Object parameterValue = configurationParameterSettings.getParameterValue(parameter.getName());
+	private void replaceVariables(
+			AnalysisEngineMetaData analysisEngineMetaData,
+			ConfigurationParameterDeclarations configurationParameterDeclarations) {
+		for (final ConfigurationParameter parameter : configurationParameterDeclarations
+				.getConfigurationParameters()) {
+			final ConfigurationParameterSettings configurationParameterSettings = analysisEngineMetaData
+					.getConfigurationParameterSettings();
+			final Object parameterValue = configurationParameterSettings
+					.getParameterValue(parameter.getName());
 			if (parameterValue instanceof String) {
 				/*
 				 * replace $dir with the local path
 				 */
 
-				configurationParameterSettings.setParameterValue(
-						parameter.getName(),
-						((String) parameterValue).replaceAll("\\$dir", this.results_dir.toString()));
+				configurationParameterSettings.setParameterValue(parameter
+						.getName(), ((String) parameterValue).replaceAll(
+						"\\$dir", this.results_dir.toString()));
 				/*
-				 * replace $resource with the resource that has been added by addArchive.
+				 * replace $resource with the resource that has been added by
+				 * addArchive.
 				 */
-				for (final Entry<String, URL> resource : this.resourceURIs.entrySet()) {
-					if (((String) parameterValue).contains("$" + resource.getKey())) {
-						sLogger.info(
-								"replaced $" +
-										resource.getKey() +
-										" in " +
-										analysisEngineMetaData.getName());
+				for (final Entry<String, URL> resource : this.resourceURIs
+						.entrySet()) {
+					if (((String) parameterValue).contains("$"
+							+ resource.getKey())) {
+						sLogger.info("replaced $" + resource.getKey() + " in "
+								+ analysisEngineMetaData.getName());
 					}
-					configurationParameterSettings.setParameterValue(
-							parameter.getName(),
-							((String) parameterValue).replaceAll("\\$" + resource, resource.getValue().toString()));
+					configurationParameterSettings
+							.setParameterValue(parameter.getName(),
+									((String) parameterValue).replaceAll("\\$"
+											+ resource, resource.getValue()
+											.toString()));
 				}
 			}
 		}
@@ -168,29 +190,30 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 			this.engine.batchProcessComplete();
 			this.engine.collectionProcessComplete();
 			// copy back data
-			copyDir(this.results_dir, FileOutputFormat.getWorkOutputPath(this.job));
-		}
-		catch (final AnalysisEngineProcessException e) {
+			copyDir(this.results_dir,
+					FileOutputFormat.getWorkOutputPath(this.job));
+		} catch (final AnalysisEngineProcessException e) {
 			throw new IOException(e);
 		}
 		this.engine.destroy();
 	}
 
 	/**
-	 * copy a whole directory tree from the local directory on the node back to a directory on hdfs
+	 * copy a whole directory tree from the local directory on the node back to
+	 * a directory on hdfs
 	 * 
 	 * @param results_dir
 	 * @param dest
 	 * @throws IOException
 	 */
-	private void copyDir(Path results_dir, Path dest) throws IOException
-	{
+	private void copyDir(Path results_dir, Path dest) throws IOException {
 		// Copy output only if not empty
-		if (this.localFS.exists(results_dir) &&
-				this.localFS.listFiles(results_dir, false).hasNext()) {
+		if (this.localFS.exists(results_dir)
+				&& this.localFS.listStatus(results_dir).length > 0) {
 			FileSystem.get(this.job).mkdirs(dest);
 			// copy the whole directory tree
-			FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job), dest, true, this.job);
+			FileUtil.copy(this.localFS, results_dir, FileSystem.get(this.job),
+					dest, true, this.job);
 		}
 	}
 }

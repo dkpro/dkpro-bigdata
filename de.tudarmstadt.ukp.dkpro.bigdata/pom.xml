@@ -105,7 +105,8 @@
 								</goals>
 								<configuration>
 									<excludes>
-										<exclude>.gitignore</exclude>
+										<exclude>.*</exclude>
+										<exclude>dependency-reduced-pom.xml</exclude>
 										<exclude>pom.xml</exclude>
 										<!-- maven config files -->
 										<exclude>src/filter/**/*</exclude>

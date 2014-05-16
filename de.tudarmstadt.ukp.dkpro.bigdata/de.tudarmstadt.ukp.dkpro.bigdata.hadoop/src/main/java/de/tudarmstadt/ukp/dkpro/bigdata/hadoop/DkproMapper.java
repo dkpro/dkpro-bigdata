@@ -78,12 +78,14 @@ public class DkproMapper extends UIMAMapReduceBase implements
 			}
 
 			final Text outkey = getOutputKey(key, aCAS);
-			outValue.setCAS(aCAS);
 			// update counters
 			if (aCAS.getDocumentText() != null)
-				reporter.incrCounter("uima", "overall doc size", outValue
-						.getCAS().getDocumentText().length());
-			output.collect(outkey, outValue);
+				reporter.incrCounter("uima", "overall doc size",
+						aCAS.getDocumentText().length());
+			if (this.job.getBoolean("dkpro.output.writecas", true)) {
+				outValue.setCAS(aCAS);
+				output.collect(outkey, outValue);
+			}
 		} catch (final AnalysisEngineProcessException e) {
 			reporter.incrCounter("uima", e.toString(), 1);
 			if (failures++ > maxFailures)

@@ -37,6 +37,7 @@ import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapred.lib.NullOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
@@ -179,11 +180,15 @@ public abstract class DkproHadoopDriver
         // Just in case compression is on
         this.job.set("mapred.output.compression.type", "BLOCK");
 
-        if (this.job.getBoolean("dkpro.output.plaintext", false)) {
-            this.job.setOutputFormat(TextOutputFormat.class);
-        }
-        else {
-            this.job.setOutputFormat(SequenceFileOutputFormat.class);
+        if (this.job.getBoolean("dkpro.output.writecas", true)) {
+	        if (this.job.getBoolean("dkpro.output.plaintext", false)) {
+	            this.job.setOutputFormat(TextOutputFormat.class);
+	        }
+	        else {
+	            this.job.setOutputFormat(SequenceFileOutputFormat.class);
+	        }
+        } else {
+    		job.setOutputFormat(NullOutputFormat.class);
         }
         // this.job.set("mapred.output.compression.codec",
         // "org.apache.hadoop.io.compress.GzipCodec");

@@ -31,7 +31,6 @@ import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.analysis_engine.metadata.AnalysisEngineMetaData;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.apache.uima.resource.ResourceSpecifier;
 import org.apache.uima.resource.metadata.ConfigurationParameter;
 import org.apache.uima.resource.metadata.ConfigurationParameterDeclarations;
 import org.apache.uima.resource.metadata.ConfigurationParameterSettings;
@@ -49,7 +48,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	private LocalFileSystem localFS;
 	private Path working_dir;
 	private Path results_dir;
-	private JobConf job;
+	protected JobConf job;
 	private Map<String, URL> resourceURIs;
 	protected int failures = 0;
 	protected int maxFailures = 100;
@@ -127,15 +126,22 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 		ConfigurationParameterDeclarations configurationParameterDeclarations = analysisEngineMetaData
 				.getConfigurationParameterDeclarations();
 
-		if (engineDescription.isPrimitive()) { // anchor
+//		MetaDataObject o = engineDescription.getMetaData();
+//		if (engineDescription.isPrimitive()) { // anchor
 			replaceVariables(analysisEngineMetaData,
 					configurationParameterDeclarations);
-			return;
-		}
-
+//			return;
+//		}
+/*
+		engineDescription.toString();
+		Map<String, ResourceSpecifier> foo = engineDescription.getAllComponentSpecifiers(null);
 		for (final Entry<String, ResourceSpecifier> e : engineDescription
-				.getDelegateAnalysisEngineSpecifiers().entrySet())
-			replaceRecursively((AnalysisEngineDescription) e.getValue());
+				.getDelegateAnalysisEngineSpecifiers().entrySet()) {
+			ResourceSpecifier rs = e.getValue();
+			if (rs instanceof AnalysisEngineDescription) {
+				replaceRecursively((AnalysisEngineDescription) rs);
+			}
+		}*/
 	}
 
 	/**
@@ -207,6 +213,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	 * @throws IOException
 	 */
 	private void copyDir(Path results_dir, Path dest) throws IOException {
+//		System.out.println("Copying stuff from " + results_dir + " to " + dest);
 		// Copy output only if not empty
 		if (this.localFS.exists(results_dir)
 				&& this.localFS.listStatus(results_dir).length > 0) {

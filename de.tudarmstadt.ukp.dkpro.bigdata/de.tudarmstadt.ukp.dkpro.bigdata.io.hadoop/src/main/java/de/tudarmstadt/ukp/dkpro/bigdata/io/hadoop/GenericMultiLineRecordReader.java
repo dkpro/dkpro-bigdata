@@ -43,10 +43,12 @@ public abstract class GenericMultiLineRecordReader<V> implements RecordReader<Te
 
 	private final LineRecordReader lineReader;
 	private final FileSplit split;
+	private int maxNumLinesPerSplit;
 	
 	public GenericMultiLineRecordReader(FileSplit split, JobConf jobConf, Reporter reporter) throws IOException {
 		lineReader = new LineRecordReader(jobConf, split);
 		this.split = split;
+		maxNumLinesPerSplit = jobConf.getInt("dkpro.input.maxlinesperrecord", Integer.MAX_VALUE);
 	}
 	
 	@Override
@@ -55,15 +57,19 @@ public abstract class GenericMultiLineRecordReader<V> implements RecordReader<Te
 		Text docKey = new Text(split.toString());
 		StringBuilder doc = new StringBuilder();
 		Text line = lineReader.createValue();
-		boolean success;
-		while ((success = lineReader.next(lineKey, line))) {
+		int lineCount = 0;
+		while (lineReader.next(lineKey, line)) {
 			// Document key is key of first line (in this split)
 			doc.append(line);
 			doc.append("\n");
+			lineCount++;
+			if (lineCount == maxNumLinesPerSplit) {
+				break;
+			}
 		}
 		
 		// success == true iff. we read at least one line
-		success = doc.length() > 0;
+		boolean success = doc.length() > 0;
 		if (success) {
 			Text docValue = new Text(doc.toString());
 			convertValue(docKey, docValue, value);

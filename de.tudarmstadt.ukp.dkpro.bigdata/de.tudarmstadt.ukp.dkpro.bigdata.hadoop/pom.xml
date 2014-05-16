@@ -112,7 +112,8 @@
 							<exclude>org.apache.hadoop:*</exclude>
 						</excludes>
 					</artifactSet>
-                    <minimizeJar>true</minimizeJar>
+					<minimizeJar>true</minimizeJar>
+					<finalName>dkpro-hadoop-${project.version}</finalName>
 				</configuration>
 			</execution>
 		</executions>

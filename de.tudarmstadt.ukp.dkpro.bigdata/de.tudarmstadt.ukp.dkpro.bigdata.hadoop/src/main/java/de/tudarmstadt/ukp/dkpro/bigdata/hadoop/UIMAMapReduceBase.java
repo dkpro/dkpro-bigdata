@@ -19,6 +19,7 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.LocalFileSystem;
@@ -48,6 +49,9 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	private LocalFileSystem localFS;
 	private Path working_dir;
 	private Path results_dir;
+	// inputName is either the folder name on HDFS, e.g. "news10M",
+	// or a specific file, e.g. "news10M.txt"
+	private String inputName;
 	protected JobConf job;
 	private Map<String, URL> resourceURIs;
 	protected int failures = 0;
@@ -67,6 +71,10 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	public void configure(JobConf job) {
 		try {
 			this.job = job;
+			this.inputName = job.get("map.input.dir");
+			if (this.inputName == null) {
+				this.inputName = job.get("map.input.file");
+			}
 			this.mapOutputValueClass = job.getMapOutputValueClass();
 			this.outputValueClass = job.getOutputValueClass();
 			this.samplingPropability = job.getInt("dkpro.map.samplingratio",
@@ -161,30 +169,47 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 			final Object parameterValue = configurationParameterSettings
 					.getParameterValue(parameter.getName());
 			if (parameterValue instanceof String) {
+				String paramValue = (String)parameterValue;
+				
 				/*
 				 * replace $dir with the local path
 				 */
-
-				configurationParameterSettings.setParameterValue(parameter
-						.getName(), ((String) parameterValue).replaceAll(
-						"\\$dir", this.results_dir.toString()));
+				paramValue = paramValue.replaceAll("\\$dir", this.results_dir.toString());
+				/*
+				 * replace $input with the name of the input (folder of file)
+				 */
+				paramValue = paramValue.replaceAll("\\$input", this.inputName.toString());
 				/*
 				 * replace $resource with the resource that has been added by
 				 * addArchive.
 				 */
+
+				if (paramValue.startsWith("$cache/")) {
+					String fileName = paramValue.substring("$cache/".length());
+					try {
+						Path[] cacheFiles = DistributedCache.getLocalCacheFiles(job);
+						for (Path cacheFile : cacheFiles) {
+							if (cacheFile.getName().equals(fileName)) {
+								paramValue = cacheFile.toString();
+								break;
+							}
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 				for (final Entry<String, URL> resource : this.resourceURIs
 						.entrySet()) {
-					if (((String) parameterValue).contains("$"
-							+ resource.getKey())) {
+					if (paramValue.contains("$" + resource.getKey())) {
 						sLogger.info("replaced $" + resource.getKey() + " in "
 								+ analysisEngineMetaData.getName());
 					}
-					configurationParameterSettings
-							.setParameterValue(parameter.getName(),
-									((String) parameterValue).replaceAll("\\$"
-											+ resource, resource.getValue()
-											.toString()));
+					paramValue = paramValue.replaceAll("\\$" + resource,
+							resource.getValue().toString());
 				}
+				
+				// Update configuration
+				configurationParameterSettings.setParameterValue(parameter.getName(), paramValue);
 			}
 		}
 	}

@@ -90,8 +90,12 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 			// replace the $dir variable within the configuration.
 			this.fs = FileSystem.get(job);
 			this.localFS = FileSystem.getLocal(job);
-			this.working_dir = new Path("uima_output_"
-					+ job.get("mapred.task.id"));
+			if (job.getBoolean("dkpro.output.onedirpertask", true)) {
+				this.working_dir = new Path("uima_output_" +
+						job.get("mapred.task.id"));
+			} else {
+				this.working_dir = new Path("uima_output");
+			}
 			final Path outputPath = FileOutputFormat.getOutputPath(job);
 			this.results_dir = this.fs.startLocalOutput(outputPath,
 					job.getLocalPath(this.working_dir.getName()));

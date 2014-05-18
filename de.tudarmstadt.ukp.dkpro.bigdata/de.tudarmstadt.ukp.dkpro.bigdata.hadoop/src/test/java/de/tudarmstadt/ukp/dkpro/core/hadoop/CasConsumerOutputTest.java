@@ -46,23 +46,26 @@ public class CasConsumerOutputTest {
 	@Test
 	public void test() {
 		try {
-			String inputdir = CasConsumerOutputTest.class.getResource("test-input").getFile();
+			String inputdir = "src/test/resources/test-input";//CasConsumerOutputTest.class.getResource("test-input").getFile();
 			String outputdir = Files.createTempDir().getAbsolutePath();
 			String[] args = { inputdir, outputdir };
 			System.out.println(Arrays.asList(args));
 			ToolRunner.run(new Configuration(), new CasConsumerOutputPipeline(), args);
 
 			Assert.assertTrue(new File(outputdir, "_SUCCESS").exists());
+			int numOutputDirs = 0;
 			for (File uima_output_attempt_dir : new File(outputdir).listFiles(new FileFilter() {
 				@Override
 				public boolean accept(File pathname) {
 					return pathname.isDirectory() && pathname.getName().startsWith("uima_output_attempt");
 				}
 			})) {
+				numOutputDirs++;
 				File output_file = new File(uima_output_attempt_dir, "cas_consumer_output.txt");
 				Assert.assertTrue(output_file.exists());
 				Assert.assertTrue(output_file.length() > 0);
 			}
+			Assert.assertEquals(1, numOutputDirs);
 
 		} catch (Exception e) {
 			e.printStackTrace();

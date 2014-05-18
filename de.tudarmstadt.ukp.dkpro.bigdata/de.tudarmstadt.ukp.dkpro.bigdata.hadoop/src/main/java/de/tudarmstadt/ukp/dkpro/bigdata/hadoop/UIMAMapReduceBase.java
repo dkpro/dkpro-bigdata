@@ -32,6 +32,7 @@ import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.analysis_engine.metadata.AnalysisEngineMetaData;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.apache.uima.resource.ResourceSpecifier;
 import org.apache.uima.resource.metadata.ConfigurationParameter;
 import org.apache.uima.resource.metadata.ConfigurationParameterDeclarations;
 import org.apache.uima.resource.metadata.ConfigurationParameterSettings;
@@ -144,16 +145,14 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 					configurationParameterDeclarations);
 //			return;
 //		}
-/*
-		engineDescription.toString();
-		Map<String, ResourceSpecifier> foo = engineDescription.getAllComponentSpecifiers(null);
+
 		for (final Entry<String, ResourceSpecifier> e : engineDescription
 				.getDelegateAnalysisEngineSpecifiers().entrySet()) {
 			ResourceSpecifier rs = e.getValue();
 			if (rs instanceof AnalysisEngineDescription) {
 				replaceRecursively((AnalysisEngineDescription) rs);
 			}
-		}*/
+		}
 	}
 
 	/**

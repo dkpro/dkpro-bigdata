@@ -53,6 +53,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	// inputName is either the folder name on HDFS, e.g. "news10M",
 	// or a specific file, e.g. "news10M.txt"
 	private String inputName;
+	private String taskId;
 	protected JobConf job;
 	private Map<String, URL> resourceURIs;
 	protected int failures = 0;
@@ -76,6 +77,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 			if (this.inputName == null) {
 				this.inputName = job.get("map.input.file");
 			}
+			this.taskId = job.get("mapred.task.id");
 			this.mapOutputValueClass = job.getMapOutputValueClass();
 			this.outputValueClass = job.getOutputValueClass();
 			this.samplingPropability = job.getInt("dkpro.map.samplingratio",
@@ -181,7 +183,11 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 				/*
 				 * replace $input with the name of the input (folder of file)
 				 */
-				paramValue = paramValue.replaceAll("\\$input", this.inputName.toString());
+				paramValue = paramValue.replaceAll("\\$input", this.inputName);
+				/*
+				 * replace $taskid with the task id ("output_attempt_...")
+				 */
+				paramValue = paramValue.replaceAll("\\$taskid", this.taskId);
 				/*
 				 * replace $resource with the resource that has been added by
 				 * addArchive.

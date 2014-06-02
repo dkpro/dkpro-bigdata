@@ -73,10 +73,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	public void configure(JobConf job) {
 		try {
 			this.job = job;
-			this.inputName = job.get("map.input.dir");
-			if (this.inputName == null) {
-				this.inputName = job.get("map.input.file");
-			}
+			this.inputName = job.get("mapreduce.input.fileinputformat.inputdir");
 			this.taskId = job.get("mapred.task.id");
 			this.mapOutputValueClass = job.getMapOutputValueClass();
 			this.outputValueClass = job.getOutputValueClass();

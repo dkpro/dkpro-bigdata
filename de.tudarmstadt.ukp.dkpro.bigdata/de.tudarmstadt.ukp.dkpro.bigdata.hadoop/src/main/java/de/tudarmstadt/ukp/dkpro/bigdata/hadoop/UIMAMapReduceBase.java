@@ -11,7 +11,6 @@ package de.tudarmstadt.ukp.dkpro.bigdata.hadoop;
 
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngine;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
@@ -200,7 +199,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 						Path[] cacheFiles = DistributedCache.getLocalCacheFiles(job);
 						for (Path cacheFile : cacheFiles) {
 							if (cacheFile.getName().equals(fileName)) {
-								paramValue = new File(cacheFile.toUri()).getAbsolutePath();
+								paramValue = cacheFile.toUri().getPath();
 								break;
 							}
 						}

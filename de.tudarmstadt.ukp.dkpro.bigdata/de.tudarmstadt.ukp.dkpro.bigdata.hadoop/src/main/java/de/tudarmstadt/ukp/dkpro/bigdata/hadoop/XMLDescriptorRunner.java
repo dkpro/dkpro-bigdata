@@ -32,8 +32,8 @@ import org.apache.uima.util.InvalidXMLException;
 import org.apache.uima.util.XMLInputSource;
 
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
-import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.MultiLineText2CASInputFormat;
-import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.MultiLineText2CASInputFormat.DocumentTextExtractor;
+import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.Text2CASInputFormat;
+import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.Text2CASInputFormat.DocumentTextExtractor;
 
 /**
  * Annotates output of SentenceExtractCompactJob with UIMA annotators.
@@ -73,7 +73,10 @@ public class XMLDescriptorRunner extends DkproHadoopDriver {
 
 	@Override
 	public void configure(JobConf job) {
-		MultiLineText2CASInputFormat.setDocumentTextExtractorClass(job, SimpleLineInputFormat.class);
+		// Allow user to specify own document text extractor
+		if (job.get("dkpro.uima.text2casinputformat.documenttextextractor") == null) {
+			job.set("dkpro.uima.text2casinputformat.documenttextextractor", SimpleLineInputFormat.class.getName());
+		}
 	}
 
 	@Override
@@ -107,7 +110,7 @@ public class XMLDescriptorRunner extends DkproHadoopDriver {
 
 	@Override
 	public Class<? extends InputFormat<Text, CASWritable>> getInputFormatClass() {
-		return MultiLineText2CASInputFormat.class;
+		return Text2CASInputFormat.class;
 	}
 
 	public static class SimpleLineInputFormat implements DocumentTextExtractor {

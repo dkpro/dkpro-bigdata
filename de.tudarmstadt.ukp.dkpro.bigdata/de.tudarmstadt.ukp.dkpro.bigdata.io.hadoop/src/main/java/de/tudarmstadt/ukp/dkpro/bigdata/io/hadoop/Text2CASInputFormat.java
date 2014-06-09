@@ -76,6 +76,34 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable> {
 	}
 
 	/**
+	 * Provide a custom implementation of this interface if you want to
+	 * extract annotations from the <Text, Text> key/value lines in the input files.<br>
+	 * <br>
+	 * By default, i.e. if you do not set a custom AnnotationExtractor, no annotations
+	 * are added to the initial CAS.
+	 */
+	public interface AnnotationExtractor {
+		void extractAnnotations(Text key, Text value, CAS cas);
+	}
+
+	/**
+	 * Tells Text2CASInputFormat to use a custom implementation of
+	 * AnnotationExtractor. <br>
+	 * Specifying an AnnotationExtractor implementation is optional
+	 * and not necessary for this input format to work.
+	 * 
+	 * @param conf
+	 *            Configuration object
+	 * @param extractorClass
+	 *            Implementation of DocumentTextExtractor
+	 */
+	public static void setAnnotationExtractorClass(Configuration conf,
+			Class<? extends AnnotationExtractor> extractorClass) {
+		conf.set("dkpro.uima.text2casinputformat.annotationextractor",
+				extractorClass.getName());
+	}
+
+	/**
 	 * Provide a custom implementation of this interface if you want the
 	 * generated CAS instances to have metadata different from the value of
 	 * <Text, Text> key/value lines in the input files.<br>
@@ -116,15 +144,18 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable> {
 	 * 
 	 */
 	private class Text2CASRecordReader extends
-			GenericKeyValueLineRecordReader<Text, CASWritable> {
+		GenericMultiLineRecordReader<CASWritable> {
 		private final DocumentTextExtractor textExtractor;
+		private final AnnotationExtractor annotationExtractor;
 		private final DocumentMetadataExtractor metadataExtractor;
 
 		public Text2CASRecordReader(FileSplit fileSplit, JobConf jobConf,
 				Reporter reporter, DocumentTextExtractor textExtractor,
+				AnnotationExtractor annotationExtractor,
 				DocumentMetadataExtractor metadataExtractor) throws IOException {
 			super(fileSplit, jobConf, reporter);
 			this.textExtractor = textExtractor;
+			this.annotationExtractor = annotationExtractor;
 			this.metadataExtractor = metadataExtractor;
 		}
 
@@ -139,11 +170,6 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable> {
 		}
 
 		@Override
-		public void convertKey(Text keyFrom, Text valueFrom, Text keyTo) {
-			keyTo.set(keyFrom);
-		}
-
-		@Override
 		public void convertValue(Text keyFrom, Text valueFrom,
 				CASWritable valueTo) {
 			CAS cas = valueTo.getCAS();
@@ -153,6 +179,10 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable> {
 				doc = textExtractor.extractDocumentText(keyFrom, valueFrom);
 
 			cas.setDocumentText(doc.toString());
+			
+			if (annotationExtractor != null)
+				annotationExtractor.extractAnnotations(keyFrom, valueFrom, cas);
+			
 			try {
 				// add some simple metadata
 				String key_as_str = keyFrom.toString();
@@ -189,6 +219,23 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable> {
 				e.printStackTrace();
 			}
 		}
+		
+		AnnotationExtractor annotationExtractor = null;
+		String annotationExtractorClass = jobConf
+				.get("dkpro.uima.text2casinputformat.annotationextractor");
+		if (annotationExtractorClass != null) {
+			try {
+				annotationExtractor = (AnnotationExtractor) Class.forName(
+						annotationExtractorClass).newInstance();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		DocumentMetadataExtractor metadataConverter = null;
 		String metadataConverterClass = jobConf
 				.get("dkpro.uima.text2casinputformat.documentmetadataextractor");
@@ -205,7 +252,7 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable> {
 			}
 		}
 		return new Text2CASRecordReader((FileSplit) split, jobConf, reporter,
-				textConverter, metadataConverter);
+				textConverter, annotationExtractor, metadataConverter);
 	}
 
 }

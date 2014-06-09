@@ -48,7 +48,7 @@ public abstract class GenericMultiLineRecordReader<V> implements RecordReader<Te
 	public GenericMultiLineRecordReader(FileSplit split, JobConf jobConf, Reporter reporter) throws IOException {
 		lineReader = new LineRecordReader(jobConf, split);
 		this.split = split;
-		maxNumLinesPerSplit = jobConf.getInt("dkpro.input.maxlinesperrecord", Integer.MAX_VALUE);
+		maxNumLinesPerSplit = jobConf.getInt("dkpro.input.maxlinesperrecord", 1);
 	}
 	
 	@Override

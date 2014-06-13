@@ -21,12 +21,12 @@ import static org.apache.uima.fit.factory.TypeSystemDescriptionFactory.createTyp
 
 import java.io.IOException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.tools.ant.filters.StringInputStream;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.impl.XCASDeserializer;
 import org.apache.uima.util.CasCreationUtils;
@@ -64,7 +64,7 @@ public class FormatConverterMapper
         try {
             CAS cas = CasCreationUtils.createCas(createTypeSystemDescription(), null, null);
 
-            XCASDeserializer.deserialize(new StringInputStream(value.toString()), cas);
+            XCASDeserializer.deserialize(IOUtils.toInputStream(value.toString(), "UTF-8"), cas);
 
             // XCASDeserializer.deserialize(IOUtils.toInputStream(value.toString(), "utf8"), cas);
             CASWritable casWritable = new BinCasWithTypeSystemWritable();

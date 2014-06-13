@@ -166,7 +166,7 @@ public abstract class DkproHadoopDriver
         // cleanup previous output
         fs.delete(outputPath, true);
         // this is a sensible default for the UKP cluster
-        int numMappers = 256;
+//        int numMappers = 256;
         // if (args.length > 2) {
         // numMappers = Integer.parseInt(args[2]);
         // }
@@ -209,9 +209,9 @@ public abstract class DkproHadoopDriver
         this.job.setOutputValueClass(BinCasWithTypeSystemWritable.class);
         this.job.setJobName(this.getClass().getSimpleName());
         // this.job.set("mapred.child.java.opts", "-Xmx1g");
-        this.job.setInt("mapred.job.map.memory.mb", 1280);
-        this.job.setInt("mapred.job.reduce.memory.mb", 1280);
-        this.job.setNumMapTasks(numMappers);
+//        this.job.setInt("mapred.job.map.memory.mb", 1280);
+//        this.job.setInt("mapred.job.reduce.memory.mb", 1280);
+//        this.job.setNumMapTasks(numMappers);
         this.job.setNumReduceTasks(0);
         configure(this.job);
 

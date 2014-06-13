@@ -20,11 +20,17 @@ import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.CompressionCodecFactory;
+import org.apache.hadoop.io.compress.SplittableCompressionCodec;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.uima.cas.CAS;
@@ -41,7 +47,8 @@ import de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData;
  * @author Johannes Simon
  * 
  */
-public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable> {
+public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable>
+	implements JobConfigurable {
 
 	/**
 	 * Provide a custom implementation of this interface if you want the
@@ -255,4 +262,22 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable> {
 				textConverter, annotationExtractor, metadataConverter);
 	}
 
+	/**
+	 * The following compression-codec logic was copied from TextInputFormat
+	 */
+	private CompressionCodecFactory compressionCodecs = null;
+
+	@Override
+	public void configure(JobConf conf) {
+		compressionCodecs = new CompressionCodecFactory(conf);
+	}
+
+	@Override
+	protected boolean isSplitable(FileSystem fs, Path file) {
+		final CompressionCodec codec = compressionCodecs.getCodec(file);
+		if (null == codec) {
+			return true;
+		}
+		return codec instanceof SplittableCompressionCodec;
+	}
 }

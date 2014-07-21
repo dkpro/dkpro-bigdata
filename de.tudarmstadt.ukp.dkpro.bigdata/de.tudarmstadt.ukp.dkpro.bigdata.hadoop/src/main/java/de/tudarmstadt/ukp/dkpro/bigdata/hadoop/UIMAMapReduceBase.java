@@ -13,6 +13,7 @@ import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngine;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -30,13 +31,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
-import org.apache.uima.analysis_engine.metadata.AnalysisEngineMetaData;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.apache.uima.resource.ResourceSpecifier;
-import org.apache.uima.resource.metadata.ConfigurationParameter;
-import org.apache.uima.resource.metadata.ConfigurationParameterDeclarations;
-import org.apache.uima.resource.metadata.ConfigurationParameterSettings;
-import org.apache.uima.util.InvalidXMLException;
 
 import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
 
@@ -73,7 +68,7 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 	public void configure(JobConf job) {
 		try {
 			this.job = job;
-			this.inputName = job.get("mapreduce.input.fileinputformat.inputdir");
+			this.inputName = job.get("mapred.input.dir");
 			this.taskId = job.get("mapred.task.id");
 			this.mapOutputValueClass = job.getMapOutputValueClass();
 			this.outputValueClass = job.getOutputValueClass();
@@ -111,7 +106,22 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 				}
 
 			}
-			replaceRecursively(engineDescription);
+			Map<String, String> variableValues = new HashMap<String, String>();
+			variableValues.put("\\$dir", this.results_dir.toString());
+			variableValues.put("\\$input", this.inputName);
+			variableValues.put("\\$taskid", this.taskId);
+			Path[] cacheFiles = DistributedCache.getLocalCacheFiles(job);
+			if (cacheFiles != null) {
+				for (Path cacheFile : cacheFiles) {
+					variableValues.put("^\\$cache/" + cacheFile.getName(),
+									   cacheFile.toUri().getPath());
+				}
+			}
+			for (final Entry<String, URL> resource : this.resourceURIs.entrySet()) {
+				variableValues.put("\\$" + resource,
+						           resource.getValue().toString());
+			}
+			AnalysisEngineUtil.replaceVariables(engineDescription, variableValues);
 			this.engine = createEngine(engineDescription);
 
 		} catch (final Exception e) {
@@ -120,104 +130,6 @@ public abstract class UIMAMapReduceBase extends MapReduceBase {
 			throw new RuntimeException(e);
 		}
 
-	}
-
-	/**
-	 * Search for primitive engineDescriptions and replace some variables in
-	 * parameters.
-	 * 
-	 * Search also in nested engineDescriptions
-	 * 
-	 * @param engineDescription
-	 * @throws InvalidXMLException
-	 */
-	private void replaceRecursively(AnalysisEngineDescription engineDescription)
-			throws InvalidXMLException {
-		AnalysisEngineMetaData analysisEngineMetaData = engineDescription
-				.getAnalysisEngineMetaData();
-		ConfigurationParameterDeclarations configurationParameterDeclarations = analysisEngineMetaData
-				.getConfigurationParameterDeclarations();
-
-//		MetaDataObject o = engineDescription.getMetaData();
-//		if (engineDescription.isPrimitive()) { // anchor
-			replaceVariables(analysisEngineMetaData,
-					configurationParameterDeclarations);
-//			return;
-//		}
-
-		for (final Entry<String, ResourceSpecifier> e : engineDescription
-				.getDelegateAnalysisEngineSpecifiers().entrySet()) {
-			ResourceSpecifier rs = e.getValue();
-			if (rs instanceof AnalysisEngineDescription) {
-				replaceRecursively((AnalysisEngineDescription) rs);
-			}
-		}
-	}
-
-	/**
-	 * Replace variables in the UIMA-Engines configuration to use the resources
-	 * provides by hadoop.
-	 * 
-	 * @param analysisEngineMetaData
-	 * @param configurationParameterDeclarations
-	 */
-	private void replaceVariables(
-			AnalysisEngineMetaData analysisEngineMetaData,
-			ConfigurationParameterDeclarations configurationParameterDeclarations) {
-		for (final ConfigurationParameter parameter : configurationParameterDeclarations
-				.getConfigurationParameters()) {
-			final ConfigurationParameterSettings configurationParameterSettings = analysisEngineMetaData
-					.getConfigurationParameterSettings();
-			final Object parameterValue = configurationParameterSettings
-					.getParameterValue(parameter.getName());
-			if (parameterValue instanceof String) {
-				String paramValue = (String)parameterValue;
-				
-				/*
-				 * replace $dir with the local path
-				 */
-				paramValue = paramValue.replaceAll("\\$dir", this.results_dir.toString());
-				/*
-				 * replace $input with the name of the input (folder of file)
-				 */
-				paramValue = paramValue.replaceAll("\\$input", this.inputName);
-				/*
-				 * replace $taskid with the task id ("output_attempt_...")
-				 */
-				paramValue = paramValue.replaceAll("\\$taskid", this.taskId);
-				/*
-				 * replace $resource with the resource that has been added by
-				 * addArchive.
-				 */
-
-				if (paramValue.startsWith("$cache/")) {
-					String fileName = paramValue.substring("$cache/".length());
-					try {
-						Path[] cacheFiles = DistributedCache.getLocalCacheFiles(job);
-						for (Path cacheFile : cacheFiles) {
-							if (cacheFile.getName().equals(fileName)) {
-								paramValue = cacheFile.toUri().getPath();
-								break;
-							}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				for (final Entry<String, URL> resource : this.resourceURIs
-						.entrySet()) {
-					if (paramValue.contains("$" + resource.getKey())) {
-						sLogger.info("replaced $" + resource.getKey() + " in "
-								+ analysisEngineMetaData.getName());
-					}
-					paramValue = paramValue.replaceAll("\\$" + resource,
-							resource.getValue().toString());
-				}
-				
-				// Update configuration
-				configurationParameterSettings.setParameterValue(parameter.getName(), paramValue);
-			}
-		}
 	}
 
 	@Override

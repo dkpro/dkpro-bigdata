@@ -20,17 +20,11 @@ import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.io.compress.CompressionCodecFactory;
-import org.apache.hadoop.io.compress.SplittableCompressionCodec;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.uima.cas.CAS;
@@ -38,17 +32,15 @@ import org.apache.uima.cas.CAS;
 import de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData;
 
 /**
- * Input format for generating CAS instances from <Text, Text> key/value pairs
+ * Input format for generating CAS instances from lines of text
  * 
- * By default, the value of the <Text, Text> key/value lines in the input files
- * is used as CAS document text. See {@link setDocumentTextExtractorClass} to
- * change this behavior.
+ * All lines that lie in the boundaries of the input split are added
+ * to the document text of one CAS
  * 
  * @author Johannes Simon
  * 
  */
-public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable>
-	implements JobConfigurable {
+public class MultiLineText2CASInputFormat extends FileInputFormat<Text, CASWritable> {
 
 	/**
 	 * Provide a custom implementation of this interface if you want the
@@ -110,7 +102,7 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable>
 	 */
 	public static void setDocumentMetadataExtractorClass(Configuration conf,
 			Class<? extends DocumentMetadataExtractor> extractorClass) {
-		conf.set("dkpro.uima.text2casinputformat.documentmetadataextractor",
+		conf.set("dkpro.uima.multilinetext2casinputformat.documentmetadataextractor",
 				extractorClass.getName());
 	}
 
@@ -122,12 +114,12 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable>
 	 * @author Johannes Simon
 	 * 
 	 */
-	private class Text2CASRecordReader extends
-			GenericKeyValueLineRecordReader<Text, CASWritable> {
+	private class MultiLineText2CASRecordReader extends
+			GenericMultiLineRecordReader<CASWritable> {
 		private final DocumentTextExtractor textExtractor;
 		private final DocumentMetadataExtractor metadataExtractor;
 
-		public Text2CASRecordReader(FileSplit fileSplit, JobConf jobConf,
+		public MultiLineText2CASRecordReader(FileSplit fileSplit, JobConf jobConf,
 				Reporter reporter, DocumentTextExtractor textExtractor,
 				DocumentMetadataExtractor metadataExtractor) throws IOException {
 			super(fileSplit, jobConf, reporter);
@@ -143,11 +135,6 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable>
 		@Override
 		public CASWritable createValue() {
 			return new CASWritable();
-		}
-
-		@Override
-		public void convertKey(Text keyFrom, Text valueFrom, Text keyTo) {
-			keyTo.set(keyFrom);
 		}
 
 		@Override
@@ -211,26 +198,8 @@ public class Text2CASInputFormat extends FileInputFormat<Text, CASWritable>
 				e.printStackTrace();
 			}
 		}
-		return new Text2CASRecordReader((FileSplit) split, jobConf, reporter,
+		return new MultiLineText2CASRecordReader((FileSplit) split, jobConf, reporter,
 				textConverter, metadataConverter);
 	}
 
-	/**
-	 * The following compression-codec logic was copied from TextInputFormat
-	 */
-	private CompressionCodecFactory compressionCodecs = null;
-
-	@Override
-	public void configure(JobConf conf) {
-		compressionCodecs = new CompressionCodecFactory(conf);
-	}
-
-	@Override
-	protected boolean isSplitable(FileSystem fs, Path file) {
-		final CompressionCodec codec = compressionCodecs.getCodec(file);
-		if (null == codec) {
-			return true;
-		}
-		return codec instanceof SplittableCompressionCodec;
-	}
 }

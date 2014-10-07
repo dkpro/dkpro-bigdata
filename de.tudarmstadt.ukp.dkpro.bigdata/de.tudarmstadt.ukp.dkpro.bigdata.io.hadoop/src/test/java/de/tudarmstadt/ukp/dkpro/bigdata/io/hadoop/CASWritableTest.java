@@ -29,7 +29,6 @@ import java.io.ObjectOutputStream;
 
 import org.apache.uima.cas.CAS;
 import org.apache.uima.util.CasCreationUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class CASWritableTest

@@ -146,7 +146,7 @@ public abstract class DkproHadoopDriver
 
         }
         String outDir = args[1];
-		if (!getConf().getBoolean("dkpro.output.override", true)) {
+		if (!getConf().getBoolean("dkpro.output.overwrite", true)) {
 			outDir = getUniqueDirectoryName(outDir, fs);
 		}
         final Path outputPath = new Path(outDir);// output

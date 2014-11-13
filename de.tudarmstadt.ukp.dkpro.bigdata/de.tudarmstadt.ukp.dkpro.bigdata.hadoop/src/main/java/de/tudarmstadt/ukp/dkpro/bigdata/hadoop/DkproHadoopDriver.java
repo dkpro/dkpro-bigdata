@@ -19,6 +19,7 @@ package de.tudarmstadt.ukp.dkpro.bigdata.hadoop;
 
 import static org.apache.uima.fit.pipeline.SimplePipeline.runPipeline;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -144,7 +145,11 @@ public abstract class DkproHadoopDriver
             FileInputFormat.setInputPaths(this.job, inputPath);
 
         }
-        final Path outputPath = new Path(args[1]);// output
+        String outDir = args[1];
+		if (!getConf().getBoolean("dkpro.output.override", true)) {
+			outDir = getUniqueDirectoryName(outDir, fs);
+		}
+        final Path outputPath = new Path(outDir);// output
         final CollectionReader reader = buildCollectionReader();
         // if a collection reader was defined, import data into hdfs
         // try {
@@ -232,6 +237,16 @@ public abstract class DkproHadoopDriver
         	return 3;
         }
 
+    }
+    
+    private String getUniqueDirectoryName(String dir, FileSystem fs) throws IllegalArgumentException, IOException {
+		int outDirSuffix = 2;
+		String uniqueDir = dir;
+		while (fs.exists(new Path(uniqueDir))) {
+			uniqueDir = dir + outDirSuffix;
+			outDirSuffix++;
+		}
+		return uniqueDir;
     }
 
     /**

@@ -49,6 +49,7 @@ public class DkproMapper extends UIMAMapReduceBase implements
 	}
 
 	private final Random random;
+	private String docLanguage;
 
 	public DkproMapper() {
 		super();
@@ -71,6 +72,9 @@ public class DkproMapper extends UIMAMapReduceBase implements
 		reporter.incrCounter("uima", "sampling: NOT SKIPPED", 1);
 
 		try {
+			if (docLanguage != null) {
+				aCAS.setDocumentLanguage(docLanguage);
+			}
 			// let uima process the cas
 			final ProcessTrace result = this.engine.process(aCAS);
 			for (final ProcessTraceEvent event : result.getEvents()) {
@@ -119,6 +123,7 @@ public class DkproMapper extends UIMAMapReduceBase implements
 		try {
 			// create an output writable of the appropriate type
 			outValue = (CASWritable) job.getMapOutputValueClass().newInstance();
+			docLanguage = job.get("dkpro.document.language");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

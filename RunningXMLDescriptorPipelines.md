@@ -1,0 +1,30 @@
+# Running a UIMA XML descriptor pipeline on Hadoop #
+
+_Warning: This functionality is still experimental. Use with caution._
+
+With certain changes, it is possible to run existing UIMA pipelines in form of UIMA XML descriptors on Hadoop using dkpro-bigdata. For this, you can use `de.tudarmstadt.ukp.dkpro.bigdata.hadoop.XMLDescriptorRunner`:
+
+```
+XMLDescriptorRunner [hadoop-params] <input> <output> <xml-descriptor>
+```
+
+More specifically, you can run it directly using the dkpro.bigdata.hadoop fat-jar created by the maven "package" goal:
+```
+$ cd de.tudarmstadt.ukp.dkpro.bigdata.hadoop
+$ mvn package -DskipTests
+$ hadoop jar target/dkpro-hadoop-XXX.jar de.tudarmstadt.ukp.dkpro.bigdata.hadoop.XMLDescriptorRunner ...
+```
+
+# Caveats #
+
+Since the UIMA pipeline will run on Hadoop, some changes must be made to the pipeline for this to work:
+  * Currently, the **input must be plain text files**. A number of lines will then be read into one CAS at a time. You can configure this using `-Ddkpro.input.maxlinesperrecord=X` (1000 - 10000 is a good number, otherwise the CAS will be too small or too large). This and other parameters must be specified before the input path, i.e. where it sais "[hadoop-params]" above.
+  * since the CASes are already read from HDFS by DKPro, you will need to **remove any collection reader from your pipeline**
+  * Jars required by the pipeline must be specified using a comma-separated list using the **`-libjars` option**. This is how the pipeline will find the classes and files you specified in the XML descriptor
+  * if you want to **read files in the pipeline**, you can either to do so using the **classpath** - using e.g. `this.getClass().getResourceAsStream("/path/to/file/in/classpath")` - or by using **Hadoop's `-files`** option. To use the latter, you will have to modify your XML descriptor to contain a configuration parameter with the value `$cache/somefile.txt` and run Hadoop with `hadoop [...] -files somefile.txt [...]`
+  * If you have a **CAS consumer** that writes output, you must use the variable `$dir` in the XML descriptor. This is a placeholder for the local (non-HDFS) path of the mapper and will get substituted with the proper path before the pipeline is run. All files written in this directory are then written back to HDFS.
+
+# Further Options #
+  * If you have one such CAS consumer and you do not need the CASes that are produced intermediately, you can tell DKPro to skip writing the CASes back to HDFS using **`-Ddkpro.output.writecas=false`**
+  * If you need the **path of the input**, you can specify a configuration option in your XML descriptor with the value containing the **`$input`** variable.
+  * If you want to **merge output of your CAS consumers** into one folder after running the pipeline on Hadoop, the variable **`$taskid`** might also come in handy. You can then introduce a configuration option using this variable to append the Hadoop task id to the output files.

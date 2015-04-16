@@ -33,7 +33,7 @@ public class HdfsResourceLoaderLocator
     extends Resource_ImplBase
     implements ExternalResourceLocator
 {
-    private static final String PARAM_FILESYSTEM = "fileSystem";
+    public static final String PARAM_FILESYSTEM = "fileSystem";
     @ConfigurationParameter(name = PARAM_FILESYSTEM, mandatory = false)
     private String fileSystem;
 
@@ -43,6 +43,7 @@ public class HdfsResourceLoaderLocator
     public boolean initialize(ResourceSpecifier aSpecifier, Map<String, Object> aAdditionalParams)
         throws ResourceInitializationException
     {
+        super.initialize(aSpecifier, aAdditionalParams);
         try {
             if (fileSystem == null)
                 new HdfsResourceLoader(new Configuration(true));

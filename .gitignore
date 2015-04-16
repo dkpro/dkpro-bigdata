@@ -1,6 +1,5 @@
-.settings
-.project~
 .project
+.settings
 *~
 nohup.out
 .classpath

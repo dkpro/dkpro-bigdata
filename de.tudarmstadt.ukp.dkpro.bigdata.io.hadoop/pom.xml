@@ -1,21 +1,13 @@
-<!--
-	Copyright 2010
-	Ubiquitous Knowledge Processing (UKP) Lab
-	Technische Universität Darmstadt
-
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
-
-	http://www.apache.org/licenses/LICENSE-2.0
-
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
---> 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!-- Copyright 2010 Ubiquitous Knowledge Processing (UKP) Lab Technische 
+	Universität Darmstadt Licensed under the Apache License, Version 2.0 (the 
+	"License"); you may not use this file except in compliance with the License. 
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 
+	Unless required by applicable law or agreed to in writing, software distributed 
+	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES 
+	OR CONDITIONS OF ANY KIND, either express or implied. See the License for 
+	the specific language governing permissions and limitations under the License. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
@@ -26,30 +18,22 @@
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
 	<packaging>jar</packaging>
 	<dependencies>
-		
+
 		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
 			<artifactId>de.tudarmstadt.ukp.dkpro.core.api.parameter-asl</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>de.tudarmstadt.ukp.dkpro.core.api.metadata-asl</artifactId>
+			<groupId>org.jwat</groupId>
+			<artifactId>jwat-arc</artifactId>
+			<version>1.0.0</version>
 		</dependency>
+
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
+			<groupId>org.jwat</groupId>
+			<artifactId>jwat-warc</artifactId>
+			<version>1.0.0</version>
 		</dependency>
-	<dependency>
-  		<groupId>org.jwat</groupId>
-  		<artifactId>jwat-arc</artifactId>
-  		<version>1.0.0</version>
-  	</dependency>
-  
-  	<dependency>
-  		<groupId>org.jwat</groupId>
-  		<artifactId>jwat-warc</artifactId>
-  		<version>1.0.0</version>
-  	</dependency>
 		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
 			<artifactId>de.tudarmstadt.ukp.dkpro.core.io.text-asl</artifactId>
@@ -60,43 +44,20 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-<!-- 		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-yarn-server-tests</artifactId>
-			<version>${hadoop.version}</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>  Jar has been removed from Maven central
-					<groupId>javax.jms</groupId>
-					<artifactId>jms</artifactId>
-				</exclusion>
-			</exclusions> 
-		</dependency> -->
+		<!-- <dependency> <groupId>org.apache.hadoop</groupId> <artifactId>hadoop-yarn-server-tests</artifactId> 
+			<version>${hadoop.version}</version> <scope>test</scope> <exclusions> <exclusion> 
+			Jar has been removed from Maven central <groupId>javax.jms</groupId> <artifactId>jms</artifactId> 
+			</exclusion> </exclusions> </dependency> -->
 
-		<!-- <dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-hadoop</artifactId>
-			<version>1.0.1.RELEASE</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>hadoop-streaming</artifactId>
-					<groupId>org.apache.hadoop</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>hadoop-tools</artifactId>
-					<groupId>org.apache.hadoop</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency> -->
+		<!-- <dependency> <groupId>org.springframework.data</groupId> <artifactId>spring-data-hadoop</artifactId> 
+			<version>1.0.1.RELEASE</version> <exclusions> <exclusion> <artifactId>hadoop-streaming</artifactId> 
+			<groupId>org.apache.hadoop</groupId> </exclusion> <exclusion> <artifactId>hadoop-tools</artifactId> 
+			<groupId>org.apache.hadoop</groupId> </exclusion> </exclusions> </dependency> -->
 		<dependency>
-		<groupId>org.apache.hadoop</groupId>
-		<artifactId>hadoop-client</artifactId>
-	
-		</dependency>
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty-embedded</artifactId>
-			<version>6.1.26</version>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-minicluster</artifactId>
+			<version>2.5.0</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
@@ -105,36 +66,36 @@
 		</dependency>
 	</dependencies>
 	<build>
-	<plugins>
-	<plugin>
-						<groupId>org.apache.rat</groupId>
-						<artifactId>apache-rat-plugin</artifactId>
-				
-								<configuration>
-									<excludes>
-										<exclude>.gitignore</exclude>
-										<exclude>pom.xml</exclude>
-										<!-- maven config files -->
-										<exclude>src/filter/**/*</exclude>
-										<!-- release generated artifact -->
-										<exclude>release.properties</exclude>
-										<exclude>CHANGES</exclude>
-										<exclude>LICENCE.txt</exclude>
-										<exclude>MANIFEST.MF</exclude>
-										<exclude>NOTICE.txt</exclude>
-										<exclude>README.txt</exclude>
-										<exclude>src/main/resources/**/*</exclude>
-										<exclude>src/test/resources/**/*</exclude>
-										<!-- generated JCas wrappers -->
-										<exclude>src/main/java/**/type/**/*</exclude>
-										<exclude>build/**</exclude>
-										<exclude>.project</exclude>
-									</excludes>
-								</configuration>
-							
-	</plugin>
-	</plugins>
-	
+		<plugins>
+			<plugin>
+				<groupId>org.apache.rat</groupId>
+				<artifactId>apache-rat-plugin</artifactId>
+
+				<configuration>
+					<excludes>
+						<exclude>.gitignore</exclude>
+						<exclude>pom.xml</exclude>
+						<!-- maven config files -->
+						<exclude>src/filter/**/*</exclude>
+						<!-- release generated artifact -->
+						<exclude>release.properties</exclude>
+						<exclude>CHANGES</exclude>
+						<exclude>LICENCE.txt</exclude>
+						<exclude>MANIFEST.MF</exclude>
+						<exclude>NOTICE.txt</exclude>
+						<exclude>README.txt</exclude>
+						<exclude>src/main/resources/**/*</exclude>
+						<exclude>src/test/resources/**/*</exclude>
+						<!-- generated JCas wrappers -->
+						<exclude>src/main/java/**/type/**/*</exclude>
+						<exclude>build/**</exclude>
+						<exclude>.project</exclude>
+					</excludes>
+				</configuration>
+
+			</plugin>
+		</plugins>
+
 	</build>
-	
+
 </project>

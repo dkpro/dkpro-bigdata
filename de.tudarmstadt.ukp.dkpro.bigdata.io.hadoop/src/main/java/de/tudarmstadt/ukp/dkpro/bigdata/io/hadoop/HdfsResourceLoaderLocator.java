@@ -28,6 +28,7 @@ import org.apache.uima.fit.descriptor.ExternalResourceLocator;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.ResourceSpecifier;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.hadoop.fs.HdfsResourceLoader;
 
 public class HdfsResourceLoaderLocator
     extends Resource_ImplBase

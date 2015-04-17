@@ -86,12 +86,6 @@ public class HdfsResourceLoaderLocatorTest
         fs.copyFromLocalFile(new Path("src/test/resources/hdfsLocator/two.data"), new Path(
                 defaultdir + "/" + folder));
 
-        RemoteIterator<LocatedFileStatus> listFiles = fs.listFiles(new Path(defaultdir + "/"
-                + folder), true);
-        while (listFiles.hasNext()) {
-            LocatedFileStatus next = listFiles.next();
-            System.out.println(next.getPath().toString());
-        }
     }
 
 }

@@ -39,7 +39,7 @@ import de.tudarmstadt.ukp.dkpro.core.io.text.TextWriter;
 import de.tudarmstadt.ukp.dkpro.core.snowball.SnowballStemmer;
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.dictionaryannotator.DictionaryAnnotator;
-import de.tudarmstadt.ukp.dkpro.core.examples.type.Name;
+//import de.tudarmstadt.ukp.dkpro.core.examples.type.Name;
 public class CasConsumerExample
     extends DkproHadoopDriver
 {

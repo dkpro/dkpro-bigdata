@@ -67,7 +67,8 @@ public class Text2CASExample
     @Override
     public void configure(JobConf job)
     {
-        job.set("mapreduce.job.queuename", "smalljob");
+//        should be set from the command line as -Dmapreduce.job.queuename=xxxxx
+//        job.set("mapreduce.job.queuename", "smalljob");
         /*
 		 * Use Text2Cas InputFormat, read texts directly from h
 		 */

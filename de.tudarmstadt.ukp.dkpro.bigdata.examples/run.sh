@@ -26,6 +26,6 @@ CLASS=$3
 MEMORY=$4
 shift;shift;shift;shift
 PARAMS=$*
-RUN="hadoop jar $JAR $CLASS -Dmapreduce.job.queuename=$QUEUE -Dmapred.job.map.memory.mb=$MEMORY -Dmapred.job.reduce.memory.mb=$MEMORY -libjars $JAR,$CP   $*"
+RUN="hadoop jar $JAR $CLASS -Dmapreduce.job.queuename=$QUEUE -Dmapred.job.map.memory.mb=$MEMORY -Dmapred.job.reduce.memory.mb=$MEMORY -libjars $JAR$CP   $*"
 echo $RUN
 $RUN

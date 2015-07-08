@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 			<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
+			<version>${dkpro.bigdata.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>

@@ -15,41 +15,44 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	 <parent>
-                <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-                <artifactId>dkpro-parent-pom</artifactId> 
-                <version>6</version>
-                <relativePath />
-        </parent>
+	<parent>
+		<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+		<artifactId>dkpro-parent-pom</artifactId>
+		<version>6</version>
+		<relativePath/>
+	</parent>
 	<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
 	<version>0.1.1-SNAPSHOT</version>
 	<properties>
-<!--  	<hadoop.version>2.0.0-mr1-cdh4.5.0</hadoop.version> -->
-  <hadoop.version>2.2.0</hadoop.version> 
+		<!--  	<hadoop.version>2.0.0-mr1-cdh4.5.0</hadoop.version> -->
+		<hadoop.version>2.6.0</hadoop.version>
+		<dkpro.bigdata.version>0.1.1-SNAPSHOT</dkpro.bigdata.version>
 	</properties>
 	<packaging>pom</packaging>
 	<modules>
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.collocations</module>
-     	 
-			 
+
+
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</module>
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</module>
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.examples</module>
 	</modules>
 	<dependencyManagement>
-		 <dependencies>
+		<dependencies>
 			<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
+				<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 				<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
-				<version>0.1.1-SNAPSHOT</version>
-			</dependency> 
+				<version>${dkpro.bigdata.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 				<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
-				<version>0.1.1-SNAPSHOT</version>
+				<version>${dkpro.bigdata.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
@@ -58,12 +61,12 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
-	<dependency>
-		<groupId>org.apache.hadoop</groupId>
-		<artifactId>hadoop-client</artifactId>
-		<version>${hadoop.version}</version>
-		</dependency>
-			
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-client</artifactId>
+				<version>${hadoop.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>log4j</groupId>
 				<artifactId>log4j</artifactId>
@@ -80,7 +83,7 @@
 				</exclusions>
 			</dependency>
 
-		
+
 		</dependencies>
 	</dependencyManagement>
 	<profiles>
@@ -133,14 +136,16 @@
 	</profiles>
 	<name>DKPro BigData</name>
 	<url>https://code.google.com/p/dkpro-bigdata/</url>
-	<description>DKPro BigData enables the easy execution of UIMA-based natural language processing pipelines on a hadoop cluster.</description>
+	<description>DKPro BigData enables the easy execution of UIMA-based natural language processing
+		pipelines on a hadoop cluster.
+	</description>
 	<inceptionYear>2013</inceptionYear>
 	<scm>
 		<url>https://code.google.com/p/dkpro-bigdata/source/browse/#git</url>
 		<connection>scm:git:https://code.google.com/p/dkpro-bigdata/</connection>
-		<developerConnection>scm:git:https://code.google.com/p/dkpro-bigdata/ </developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
+		<developerConnection>scm:git:https://code.google.com/p/dkpro-bigdata/</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
 	<issueManagement>
 		<system>Google Code</system>
 		<url>https://code.google.com/p/dkpro-bigdata/issues/list</url>
@@ -154,18 +159,18 @@
 			</extension>
 		</extensions>
 	</build>
-<repositories>
-<repository>
-  <id>maven-hadoop</id>
-  <name>Hadoop Releases</name>
-  <url>https://repository.cloudera.com/content/repositories/releases/</url>
-</repository>
-  <repository>
-  <id>cloudera-repos</id>
-  <name>Cloudera Repos</name>
-  <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-</repository>
-</repositories>
+	<repositories>
+		<repository>
+			<id>maven-hadoop</id>
+			<name>Hadoop Releases</name>
+			<url>https://repository.cloudera.com/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>cloudera-repos</id>
+			<name>Cloudera Repos</name>
+			<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+		</repository>
+	</repositories>
 	<!-- <distributionManagement>
 		<repository>
 			<id>ukp-oss</id>

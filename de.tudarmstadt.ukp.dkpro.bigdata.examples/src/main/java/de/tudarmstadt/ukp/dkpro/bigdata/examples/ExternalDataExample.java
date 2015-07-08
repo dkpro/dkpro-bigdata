@@ -74,7 +74,7 @@ public class ExternalDataExample
     }
 	@Override
 	public void configure(JobConf job) {
-		job.set("mapreduce.job.queuename", "smalljob");	
+//		job.set("mapreduce.job.queuename", "smalljob");
 		job.setInputFormat(Text2CASInputFormat.class);
 	}
 	

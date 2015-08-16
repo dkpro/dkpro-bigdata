@@ -1,14 +1,14 @@
 #- menu_name: "Mailing lists"
 
-#- name: "Users"
-#  url: "http://groups.google.com/group/PROJECT_X-user"
-#  class: "network-entypo"
-#  title: "Users"
+- name: "Users"
+  url: "http://groups.google.com/group/dkpro-bigdata-users"
+  class: "services-newsletter"
+  title: "Users"
 
-#- name: "Developers"
-#  url: "http://groups.google.com/group/PROJECT_X-developers"
-#  class: "services-newsletter"
-#  title: "Developers"
+- name: "Developers"
+  url: "http://groups.google.com/group/dkpro-bigdata-developers"
+  class: "services-newsletter"
+  title: "Developers"
 
 #- name: "Announcements"
 #  url: "http://groups.google.com/group/PROJECT_X-announcements"

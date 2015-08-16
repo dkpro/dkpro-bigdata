@@ -36,11 +36,10 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.collocations</module>
-
-
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</module>
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</module>
 		<module>de.tudarmstadt.ukp.dkpro.bigdata.examples</module>
+		<module>de.tudarmstadt.ukp.dkpro.bigdata.doc</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

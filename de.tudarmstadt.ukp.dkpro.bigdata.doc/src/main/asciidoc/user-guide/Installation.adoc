@@ -1,0 +1,55 @@
+// Copyright 2015
+// Ubiquitous Knowledge Processing (UKP) Lab and FG Language Technology
+// Technische Universität Darmstadt
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+## Setting up a DKPro Big Data Project in Eclipse
+
+Projects that are using DKPro BigData to run on the cluster are just regular DKPro/Maven projects. Additionally you will need a set of scripts that will copy your project to the cluster and execute it there.
+You will find those scripts by checking out dkpro-bigdata-examples or you can download them using the following links:
+
+----
+run.sh
+start.sh
+----
+
+### Getting from Maven Central
+
+DKPro BigData is now on Maven Central, It does not depend on any SNAPSHOT-Releases of DKPro Core 
+anymore and you should be able to just include the following dependency to your pom.xml to get started;
+
+[source,xml,subs="+attributes"]
+----
+<properties>
+  <dkpro.bigdata.version>{revnumber}</dkpro.bigdata.version>
+</properties>
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
+      <version>${dkpro.bigdata.version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<dependencies>
+  <dependency>
+    <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
+    <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
+  </dependency>
+</dependencies>
+----

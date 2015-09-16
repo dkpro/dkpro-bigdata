@@ -133,20 +133,17 @@
 		</profile>
 	</profiles>
 	<name>DKPro BigData</name>
-	<url>https://code.google.com/p/dkpro-bigdata/</url>
-	<description>DKPro BigData enables the easy execution of UIMA-based natural language processing
-		pipelines on a hadoop cluster.
-	</description>
+	<url>http://dkpro.github.io/dkpro-bigdata/</url>
+	<description>DKPro BigData enables the easy execution of UIMA-based natural language processing pipelines on a hadoop cluster.</description>
 	<inceptionYear>2013</inceptionYear>
 	<scm>
-		<url>https://code.google.com/p/dkpro-bigdata/source/browse/#git</url>
-		<connection>scm:git:https://code.google.com/p/dkpro-bigdata/</connection>
-		<developerConnection>scm:git:https://code.google.com/p/dkpro-bigdata/</developerConnection>
-		<tag>HEAD</tag>
+		<url>https://github.com/dkpro/dkpro-bigdata</url>
+		<connection>scm:git:https://github.com/dkpro/dkpro-bigdata</connection>
+		<developerConnection>scm:git:https://github.com/dkpro/dkpro-bigdata</developerConnection>
 	</scm>
 	<issueManagement>
-		<system>Google Code</system>
-		<url>https://code.google.com/p/dkpro-bigdata/issues/list</url>
+		<system>GitHub</system>
+		<url>https://github.com/dkpro/dkpro-bigdata/issues</url>
 	</issueManagement>
 	<build>
 		<extensions>
@@ -179,4 +176,8 @@
 			<url>dav:https://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-ukp-snapshots-local</url>
 		</snapshotRepository>
 	</distributionManagement> -->
+	<organization>
+		<name>Ubiquitous Knowledge Processing (UKP) Lab, Technische Universität Darmstadt</name>
+		<url>https://www.ukp.tu-darmstadt.de/</url>
+	</organization>
 </project>

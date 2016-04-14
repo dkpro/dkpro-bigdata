@@ -19,11 +19,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-		<artifactId>dkpro-parent-pom</artifactId>
-        <version>10</version>
-	</parent>
+    <parent>
+        <groupId>org.dkpro</groupId>
+        <artifactId>dkpro-parent-pom</artifactId>
+        <version>14</version>
+    </parent>
 	<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
 	<version>0.1.1-SNAPSHOT</version>

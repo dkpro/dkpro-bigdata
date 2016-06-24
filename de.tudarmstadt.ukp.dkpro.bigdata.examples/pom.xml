@@ -26,7 +26,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.examples</artifactId>
-	<name>DKPro BigData Examples</name>
+	<name>DKPro BigData - Examples</name>
 	<description>Examples pipelines to run on the cluster</description>
 	<dependencies>
 		<dependency>

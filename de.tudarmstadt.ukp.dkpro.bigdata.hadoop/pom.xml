@@ -2,122 +2,118 @@
   Copyright 2011
   Ubiquitous Knowledge Processing (UKP) Lab
   Technische Universität Darmstadt
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
-    http://www.apache.org/licenses/LICENSE-2.0
-  
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
-		<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-		<version>0.1.1-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent> 
-	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
-	<name>DKPro bigdata - Run Pipelines on Hadoop</name>
-	<dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
+    <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
+    <version>0.1.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
+  <name>DKPro BigData - Hadoop</name>
+  <dependencies>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.core.api.io-asl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.core.api.parameter-asl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.core.io.text-asl</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.core.tokit-asl</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
 
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>de.tudarmstadt.ukp.dkpro.core.api.io-asl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>de.tudarmstadt.ukp.dkpro.core.api.parameter-asl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-			<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
-			<version>${dkpro.bigdata.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>de.tudarmstadt.ukp.dkpro.core.io.text-asl</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>de.tudarmstadt.ukp.dkpro.core.tokit-asl</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-	<build>
-	<plugins>
-	<plugin>
-						<groupId>org.apache.rat</groupId>
-						<artifactId>apache-rat-plugin</artifactId>
-				
-								<configuration>
-									<excludes>
-										<exclude>.gitignore</exclude>
-										<exclude>.gitattributes</exclude>
-										<exclude>pom.xml</exclude>
-										<!-- maven config files -->
-										<exclude>src/filter/**/*</exclude>
-										<!-- release generated artifact -->
-										<exclude>release.properties</exclude>
-										<exclude>CHANGES</exclude>
-										<exclude>LICENCE.txt</exclude>
-										<exclude>MANIFEST.MF</exclude>
-										<exclude>NOTICE.txt</exclude>
-										<exclude>README.txt</exclude>
-										<exclude>src/main/resources/**/*</exclude>
-										<exclude>src/test/resources/**/*</exclude>
-										<!-- generated JCas wrappers -->
-										<exclude>src/main/java/**/type/**/*</exclude>
-										<exclude>build/**</exclude>
-										
-									</excludes>
-								</configuration>
-							
-	</plugin>
-	<plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-shade-plugin</artifactId>
-		<version>2.1</version>
-		<executions>
-			<execution>
-				<phase>package</phase>
-				<goals>
-					<goal>shade</goal>
-				</goals>
-				<configuration>
-					<filters>
-						<filter>
-							<artifact>*:*</artifact>
-							<excludes>
-								<exclude>META-INF/*.SF</exclude>
-								<exclude>META-INF/*.DSA</exclude>
-								<exclude>META-INF/*.RSA</exclude>
-							</excludes>
-						</filter>
-					</filters>
-					<artifactSet>
-						<excludes>
-							<exclude>org.apache.hadoop:*</exclude>
-						</excludes>
-					</artifactSet>
-					<finalName>dkpro-hadoop-${project.version}</finalName>
-				</configuration>
-			</execution>
-		</executions>
-	</plugin>
-	</plugins>
-	
-	</build>
+        <configuration>
+          <excludes>
+            <exclude>.gitignore</exclude>
+            <exclude>.gitattributes</exclude>
+            <exclude>pom.xml</exclude>
+            <!-- maven config files -->
+            <exclude>src/filter/**/*</exclude>
+            <!-- release generated artifact -->
+            <exclude>release.properties</exclude>
+            <exclude>CHANGES</exclude>
+            <exclude>LICENCE.txt</exclude>
+            <exclude>MANIFEST.MF</exclude>
+            <exclude>NOTICE.txt</exclude>
+            <exclude>README.txt</exclude>
+            <exclude>src/main/resources/**/*</exclude>
+            <exclude>src/test/resources/**/*</exclude>
+            <!-- generated JCas wrappers -->
+            <exclude>src/main/java/**/type/**/*</exclude>
+            <exclude>build/**</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <artifactSet>
+                <excludes>
+                  <exclude>org.apache.hadoop:*</exclude>
+                </excludes>
+              </artifactSet>
+              <finalName>dkpro-hadoop-${project.version}</finalName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

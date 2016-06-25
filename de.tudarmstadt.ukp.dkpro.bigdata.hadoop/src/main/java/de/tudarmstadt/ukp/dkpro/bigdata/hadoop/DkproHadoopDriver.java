@@ -68,11 +68,7 @@ public abstract class DkproHadoopDriver
     public abstract Class getInputFormatClass();
 
     /**
-     * 
-     * 
-     * get the mapper implementation
-     * 
-     * @return
+     * Get the mapper implementation
      */
     public Class<? extends DkproMapper> getMapperClass()
     {
@@ -80,10 +76,7 @@ public abstract class DkproHadoopDriver
     }
 
     /**
-     * 
      * Set a custom mapper implementation
-     * 
-     * @param mapperClass
      */
     public void setMapperClass(Class<? extends DkproMapper> mapperClass)
     {
@@ -97,8 +90,6 @@ public abstract class DkproHadoopDriver
 
     /**
      * Set a custom reducer implementation
-     * 
-     * @param reducerClass
      */
     public void setReducerClass(Class<? extends DkproReducer> reducerClass)
     {
@@ -137,8 +128,9 @@ public abstract class DkproHadoopDriver
         if (args[0].contains(",")) {
             String[] inputPaths = args[0].split(",");
             inputPath = new Path(inputPaths[0]);
-            for (String path : inputPaths)
+            for (String path : inputPaths) {
                 FileInputFormat.addInputPath(job, new Path(path));
+            }
         }
         else {
             inputPath = new Path(args[0]); // input

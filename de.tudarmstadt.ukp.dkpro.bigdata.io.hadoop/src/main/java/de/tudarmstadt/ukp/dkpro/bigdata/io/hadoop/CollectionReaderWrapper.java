@@ -31,10 +31,9 @@ import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.apache.uima.util.Progress;
 
 /**
- * Wraps an existing CollectionReader (UIMA) instance as RecordReader<Text, CASWritable> (Hadoop).
+ * Wraps an existing CollectionReader (UIMA) instance as RecordReader&lt;Text, CASWritable&gt; (Hadoop).
  * 
  * @author Johannes Simon
- * 
  */
 public class CollectionReaderWrapper
     implements RecordReader<Text, CASWritable>
@@ -80,8 +79,9 @@ public class CollectionReaderWrapper
     {
         Progress[] progressArr = reader.getProgress();
         for (Progress p : progressArr) {
-            if (p.getUnit().equals(Progress.BYTES))
+            if (p.getUnit().equals(Progress.BYTES)) {
                 return p.getCompleted();
+            }
         }
 
         return 0;
@@ -89,8 +89,9 @@ public class CollectionReaderWrapper
 
     private static float getPercent(long part, long total)
     {
-        if (total == 0)
+        if (total == 0) {
             return 0.0f;
+        }
         return (float) part / (float) total;
     }
 
@@ -101,8 +102,9 @@ public class CollectionReaderWrapper
         Progress[] progressArr = reader.getProgress();
         for (Progress p : progressArr) {
             // Use the first progress type that reports a total > 0
-            if (p.getTotal() > 0)
+            if (p.getTotal() > 0) {
                 return getPercent(p.getCompleted(), p.getTotal());
+            }
         }
 
         return 0.0f;
@@ -114,8 +116,9 @@ public class CollectionReaderWrapper
     {
 
         try {
-            if (!reader.hasNext())
+            if (!reader.hasNext()) {
                 return false;
+            }
             CAS nextCAS = JCasFactory.createJCas(typeSystem).getCas();
             reader.getNext(nextCAS);
             value.setCAS(nextCAS);

@@ -45,9 +45,9 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
 
   /**
    * collocation finder: pass 1 reduce phase:
-   * <p/>
+   * <p>
    * given input from the mapper, 
-   * 
+   * </p>
    * <pre>
    * k:head_subgram,ngram,  v:ngram:partial freq
    * k:head_subgram         v:head_subgram:partial freq
@@ -56,16 +56,19 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
    * k:unigram              v:unigram:partial freq
    * </pre>
    * sum gram frequencies and output for llr calculation
-   * <p/>
+   * <p>
    * output is:
+   * </p>
    * <pre>
    * k:ngram:ngramfreq      v:head_subgram:head_subgramfreq
    * k:ngram:ngramfreq      v:tail_subgram:tail_subgramfreq
    * k:unigram:unigramfreq  v:unigram:unigramfreq
    * </pre>
+   * <p>
    * Each ngram's frequency is essentially counted twice, once for head, once for tail. 
    * frequency should be the same for the head and tail. Fix this to count only for the 
    * head and move the count into the value?
+   * </p>
    */
   @Override
   protected void reduce(GramKey key, Iterable<Gram> values, Context context) throws IOException, InterruptedException {
@@ -121,11 +124,11 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
   }
 
   /** Sum frequencies for subgram, ngrams and deliver ngram, subgram pairs to the collector.
-   *  <p/>
+   *  <p>
    *  Sort order guarantees that the subgram/subgram pairs will be seen first and then
    *  subgram/ngram1 pairs, subgram/ngram2 pairs ... subgram/ngramN pairs, so frequencies for
    *  ngrams can be calcualted here as well.
-   *  <p/>
+   *  </p>
    *  We end up calculating frequencies for ngrams for each sugram (head, tail) here, which is
    *  some extra work.
    * @throws InterruptedException 

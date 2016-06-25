@@ -246,7 +246,7 @@ public abstract class DkproHadoopDriver
      * accessed from any UIMA component by specifying $name within the configuration.
      * 
      * Archives that are bigger than 4 GB need to be .tar.gz, because Java6 zip implementation does
-     * not support zip> 4GB
+     * not support zip &gt; 4GB
      * 
      * For External Resources, the ER has to be setup using job.getResource("name") in the
      * build*Engine method.

@@ -26,15 +26,16 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 
 /**
- * Generic version of KeyValueLineRecordReader from org.apache.hadoop.mapred package.<br/>
- * <br/>
+ * Generic version of KeyValueLineRecordReader from org.apache.hadoop.mapred package.
+ * <p>
  * Use this class if you need to read plain-text key/value pairs and emit potentially non-text
  * keys and values based on the input text key/value.
- * For this, <code>convertKey()</code> and <code>convertValue()</code> need to be implemented by your subclass.<br/>
- * <br/>
+ * For this, <code>convertKey()</code> and <code>convertValue()</code> need to be implemented by your subclass.
+     * </p>
+ * <p>
  * Useful for e.g. reading XML-serialized UIMA CASes. In this case, the key could be
  * the URL of the original web document, and the value the annotated document (i.e. CAS).
- * 
+ * </p>
  * @author Johannes Simon
  */
 public abstract class GenericKeyValueLineRecordReader<K, V> implements RecordReader<K, V> {

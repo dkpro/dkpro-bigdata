@@ -39,8 +39,6 @@ import de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.CASWritable;
  * input to a Mapper process again.
  * 
  * @author zorn
- * 
- * @param <Text>
  */
 public class DkproMapper extends UIMAMapReduceBase implements
 		Mapper<Text, CASWritable, Text, CASWritable> {
@@ -64,11 +62,12 @@ public class DkproMapper extends UIMAMapReduceBase implements
 		/*
 		 * SAMPLING: Process and emit only a sample of the corpus
 		 */
-		if (samplingPropability != 100)
-			if (random.nextInt(100) >= samplingPropability) {
+		if (samplingPropability != 100) {
+            if (random.nextInt(100) >= samplingPropability) {
 				reporter.incrCounter("uima", "sampling: SKIPPED", 1);
 				return;
 			}
+        }
 		reporter.incrCounter("uima", "sampling: NOT SKIPPED", 1);
 
 		try {
@@ -83,17 +82,19 @@ public class DkproMapper extends UIMAMapReduceBase implements
 
 			final Text outkey = getOutputKey(key, aCAS);
 			// update counters
-			if (aCAS.getDocumentText() != null)
-				reporter.incrCounter("uima", "overall doc size",
+			if (aCAS.getDocumentText() != null) {
+                reporter.incrCounter("uima", "overall doc size",
 						aCAS.getDocumentText().length());
+            }
 			if (this.job.getBoolean("dkpro.output.writecas", true)) {
 				outValue.setCAS(aCAS);
 				output.collect(outkey, outValue);
 			}
 		} catch (final AnalysisEngineProcessException e) {
 			reporter.incrCounter("uima", e.toString(), 1);
-			if (failures++ > maxFailures)
-				throw new IOException(e);
+			if (failures++ > maxFailures) {
+                throw new IOException(e);
+            }
 
 		}
 	}
@@ -103,9 +104,6 @@ public class DkproMapper extends UIMAMapReduceBase implements
 	 * default implementation all cases will be passed through a single reducer,
 	 * which disables parallelization but has the advantage to have one single
 	 * output file for the whole collection.
-	 * 
-	 * @param aCAS
-	 * @return
 	 */
 	protected Text getOutputKey(Text key, CAS aCAS) {
 		return key;

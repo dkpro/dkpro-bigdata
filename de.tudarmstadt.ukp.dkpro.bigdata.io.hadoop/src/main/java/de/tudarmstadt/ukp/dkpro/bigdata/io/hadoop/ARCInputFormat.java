@@ -49,7 +49,6 @@ import org.jwat.common.PayloadWithHeaderAbstract;
  * Creates ARCRecordReader for Crawler archives in ARC format
  * 
  * @author Johannes Simon
- * 
  */
 public class ARCInputFormat
     extends FileInputFormat<Text, CrawlerRecord>
@@ -66,7 +65,6 @@ public class ARCInputFormat
      * Reads Crawler archives in ARC format
      * 
      * @author Johannes Simon
-     * 
      */
     public static class ARCRecordReader
         implements RecordReader<Text, CrawlerRecord>
@@ -92,8 +90,9 @@ public class ARCInputFormat
                     "dkpro.input.content-type-whitelist", "text/html");
             if (contentTypeWhitelistStr != null) {
                 String[] contentTypes = contentTypeWhitelistStr.replace(" ", "").split(",");
-                for (String ct : contentTypes)
+                for (String ct : contentTypes) {
                     contentTypeWhitelist.add(ct);
+                }
             }
             this.conf = conf;
         }
@@ -184,20 +183,23 @@ public class ARCInputFormat
                     // Make sure only text content is read
                     PayloadWithHeaderAbstract payloadHeader = arcRecord.getPayload()
                             .getPayloadHeaderWrapped();
-                    if (payloadHeader == null || !(payloadHeader instanceof HttpHeader))
+                    if (payloadHeader == null || !(payloadHeader instanceof HttpHeader)) {
                         continue;
+                    }
                     HeaderLine contentTypeHeader = payloadHeader.getHeader("Content-Type");
                     boolean skipContentType = true;
                     if (contentTypeHeader != null) {
-                        for (String contentType : contentTypeWhitelist)
+                        for (String contentType : contentTypeWhitelist) {
                             if (contentTypeHeader.value.startsWith(contentType)) {
                                 skipContentType = false;
                                 break;
                             }
+                        }
                     }
 
-                    if (skipContentType)
+                    if (skipContentType) {
                         continue;
+                    }
 
                     fillCrawlerRecord(arcRecord, value);
                     key.set(value.getURL());

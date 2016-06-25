@@ -19,7 +19,6 @@ package de.tudarmstadt.ukp.dkpro.bigdata.collocations;
 
 import static org.apache.uima.fit.util.JCasUtil.select;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,8 +37,6 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.metadata.ResourceMetaData;
 import org.apache.uima.resource.metadata.impl.ResourceMetaData_impl;
-import org.apache.uima.util.InvalidXMLException;
-import org.apache.uima.util.XMLInputSource;
 import org.apache.uima.util.XMLParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +51,8 @@ import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 
 /**
  * Pass 1 of the Collocation discovery job which generated ngrams and emits ngrams an their
- * component n-1grams. Input is a SequeceFile<Text,StringTuple>, where the key is a document id and
+ * component n-1grams. Input is a SequeceFile&lt;Text,StringTuple&gt;, where the key is a document id and
  * the value is the tokenized documents.
- * <p/>
  */
 public class CollocMapper
     extends Mapper<Text, CASWritable, GramKey, Gram>
@@ -109,11 +105,11 @@ public class CollocMapper
 
     /**
      * Collocation finder: pass 1 map phase.
-     * <p/>
+     * <p>
      * Receives a token stream which gets passed through a Lucene ShingleFilter. The ShingleFilter
      * delivers ngrams of the appropriate size which are then decomposed into head and tail subgrams
      * which are collected in the following manner
-     * <p/>
+     * </p>
      * 
      * <pre>
      * k:head_key,           v:head_subgram
@@ -121,11 +117,11 @@ public class CollocMapper
      * k:tail_key,           v:tail_subgram
      * k:tail_key,ngram_key, v:ngram
      * </pre>
-     * <p/>
+     * <p>
      * The 'head' or 'tail' prefix is used to specify whether the subgram in question is the head or
      * tail of the ngram. In this implementation the head of the ngram is a (n-1)gram, and the tail
      * is a (1)gram.
-     * <p/>
+     * </p>
      * For example, given 'click and clack' and an ngram length of 3:
      * 
      * <pre>
@@ -134,7 +130,7 @@ public class CollocMapper
      * k: tail_'clack',                            v:tail_'clack'
      * k: tail_'clack',ngram_'click and clack'     v:ngram_'click and clack'
      * </pre>
-     * <p/>
+     * <p>
      * Also counts the total number of ngrams encountered and adds it to the counter
      * CollocDriver.Count.NGRAM_TOTAL
      * </p>
@@ -166,11 +162,14 @@ public class CollocMapper
 
             context.getCounter(Count.DOCSIZE).increment(jcas.getDocumentText().length());
 
-            if (this.windowMode == Window.DOCUMENT)
+            if (this.windowMode == Window.DOCUMENT) {
                 extractWholeDocument(context, jcas, lemmaCount);
-            else if (this.windowMode == Window.SENTENCE)
+            }
+            else if (this.windowMode == Window.SENTENCE) {
                 extractSentence(context, jcas, lemmaCount);
+            }
             else if (this.windowMode == Window.C_WINDOW)
+             {
                 extractWindow(context, jcas, lemmaCount);
             // OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(lemmaCount *
             // 4);
@@ -194,6 +193,7 @@ public class CollocMapper
             // }
             // flushCollocations(context, ngrams, unigrams);
             // context.getCounter(Count.NGRAM_TOTAL).increment(count);
+            }
 
         }
         catch (NullPointerException e1) {
@@ -218,12 +218,14 @@ public class CollocMapper
         // int count = collectCooccurencesFromCas(context, jcas, ngrams, unigrams);
         ArrayList<Lemma> terms = new ArrayList<Lemma>();
 
-        for (final Lemma term : JCasUtil.select(jcas, Lemma.class))
+        for (final Lemma term : JCasUtil.select(jcas, Lemma.class)) {
             terms.add(term);
-        for (int wcount = 0; wcount < (terms.size() / window); wcount++)
+        }
+        for (int wcount = 0; wcount < (terms.size() / window); wcount++) {
             for (int i = 0; i < window; i++) {
-                if ((wcount * window) + i > terms.size())
+                if ((wcount * window) + i > terms.size()) {
                     break;
+                }
                 String termText = terms.get((wcount * window) + i).getValue().toLowerCase();
 
                 if (!isValid(termText)) {
@@ -234,8 +236,9 @@ public class CollocMapper
                 context.getCounter(Count.WINDOWS).increment(1);
                 unigrams.adjustOrPutValue(termText, 1, 1);
                 for (int j = 0; j < window; j++) {
-                    if ((wcount * window) + j > terms.size())
+                    if ((wcount * window) + j > terms.size()) {
                         break;
+                    }
                     String termText2 = terms.get((wcount * window) + j).getValue().toLowerCase();
                     // // out.set(termText, termText2);
                     // ngrams.adjustOrPutValue(termText+" "+termText2, 1, 1);
@@ -255,13 +258,16 @@ public class CollocMapper
 
                     }
                     context.getCounter("test", "iteration").increment(1);
-                    if (countb++ > 1000)
+                    if (countb++ > 1000) {
                         break;
+                    }
                 }
-                if (counta++ > 1000)
+                if (counta++ > 1000) {
                     break;
+                }
 
             }
+        }
 
         flushCollocations(context, ngrams, unigrams);
 
@@ -277,8 +283,9 @@ public class CollocMapper
         int count = 0;
         Annotation[] previous = new Annotation[window];
         for (final Annotation sentence : select(jcas, Sentence.class)) {
-            for (int j = 0; j < previous.length - 1; j++)
+            for (int j = 0; j < previous.length - 1; j++) {
                 previous[j] = previous[j + 1];
+            }
             previous[previous.length - 1] = sentence;
             sentenceCount++;
             count += collectCooccurencesFromCoveringAnnotation(context, jcas, sentence, ngrams,
@@ -311,8 +318,9 @@ public class CollocMapper
             String termText = term.getValue().toLowerCase();
 
             POS pos = null;
-            for (POS p : JCasUtil.selectCovered(jcas, POS.class, term))
+            for (POS p : JCasUtil.selectCovered(jcas, POS.class, term)) {
                 pos = p;
+            }
 
             if (!isValid(termText)) {
 
@@ -340,11 +348,13 @@ public class CollocMapper
 
                 }
                 context.getCounter("test", "iteration").increment(1);
-                if (countb++ > 1000)
+                if (countb++ > 1000) {
                     break;
+                }
             }
-            if (counta++ > 1000)
+            if (counta++ > 1000) {
                 break;
+            }
 
         }
 
@@ -357,12 +367,15 @@ public class CollocMapper
     private String getValue(final Annotation term)
     {
 
-        if (term instanceof Token)
+        if (term instanceof Token) {
             return ((Token) term).getCoveredText().toLowerCase();
-        if (term instanceof Lemma)
+        }
+        if (term instanceof Lemma) {
             return ((Lemma) term).getValue().toLowerCase();
-        if (term instanceof Stem)
+        }
+        if (term instanceof Stem) {
             return ((Stem) term).getValue().toLowerCase();
+        }
 
         throw new UnsupportedOperationException("Unknown annotation type "
                 + term.getClass().getCanonicalName());
@@ -441,7 +454,7 @@ public class CollocMapper
     {
         int count = 0;
         int i = 0;
-        if (sentence != null)
+        if (sentence != null) {
             for (final Lemma term : JCasUtil.selectCovered(jcas, Lemma.class, sentence)) {
                 final String termText = term.getValue().toLowerCase();
 
@@ -460,8 +473,9 @@ public class CollocMapper
                     if (!isValid(termText2)) {
                         continue;
                     }
-                    if (!left.equals(termText2))
+                    if (!left.equals(termText2)) {
                         ngrams.adjustOrPutValue(left + "\t" + termText2, 1, 1);
+                    }
                     count++;
 
                 }
@@ -471,6 +485,7 @@ public class CollocMapper
                 }
 
             }
+        }
 
         return count;
     }

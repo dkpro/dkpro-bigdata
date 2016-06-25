@@ -27,15 +27,17 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 
 /**
- * Generic version of LineRecordReader from org.apache.hadoop.mapred package.<br/>
- * <br/>
+ * Generic version of LineRecordReader from org.apache.hadoop.mapred package.
+ * <p>
  * Use this class if you need to read plain-text lines and emit non-text
  * values based on the lines. This reader reads all lines in one input split in one
  * aggregated Text value.
- * <code>convertValue()</code> needs to be implemented by your subclass.<br/>
- * <br/>
+ * <code>convertValue()</code> needs to be implemented by your subclass.
+ * </p>
+ * <p>
  * Useful for e.g. generating UIMA CASes from plain text. In this case, the key would be
  * the offset of the input split, and the value a CAS initialized with all lines in the input split.
+ * </p>
  * 
  * @author Johannes Simon
  */

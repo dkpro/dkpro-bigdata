@@ -37,8 +37,8 @@ anymore and you should be able to just include the following dependency to your 
 <dependencyManagement>
   <dependencies>
     <dependency>
-      <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-      <artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
+      <groupId>org.dkpro.bigdata</groupId>
+      <artifactId>org.dkpro.bigdata</artifactId>
       <version>${dkpro.bigdata.version}</version>
       <type>pom</type>
       <scope>import</scope>
@@ -48,8 +48,8 @@ anymore and you should be able to just include the following dependency to your 
 
 <dependencies>
   <dependency>
-    <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-    <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
+    <groupId>org.dkpro.bigdata</groupId>
+    <artifactId>org.dkpro.bigdata.hadoop</artifactId>
   </dependency>
 </dependencies>
 ----

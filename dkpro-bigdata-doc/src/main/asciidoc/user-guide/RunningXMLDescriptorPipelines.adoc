@@ -18,7 +18,7 @@
 
 _Warning: This functionality is still experimental. Use with caution._
 
-With certain changes, it is possible to run existing UIMA pipelines in form of UIMA XML descriptors on Hadoop using dkpro-bigdata. For this, you can use `de.tudarmstadt.ukp.dkpro.bigdata.hadoop.XMLDescriptorRunner`:
+With certain changes, it is possible to run existing UIMA pipelines in form of UIMA XML descriptors on Hadoop using dkpro-bigdata. For this, you can use `org.dkpro.bigdata.hadoop.XMLDescriptorRunner`:
 
 ----
 XMLDescriptorRunner [hadoop-params] <input> <output> <xml-descriptor>
@@ -27,9 +27,9 @@ XMLDescriptorRunner [hadoop-params] <input> <output> <xml-descriptor>
 More specifically, you can run it directly using the dkpro.bigdata.hadoop fat-jar created by the maven "package" goal:
 
 ----
-$ cd de.tudarmstadt.ukp.dkpro.bigdata.hadoop
+$ cd dkpro-bigdata-hadoop
 $ mvn package -DskipTests
-$ hadoop jar target/dkpro-hadoop-XXX.jar de.tudarmstadt.ukp.dkpro.bigdata.hadoop.XMLDescriptorRunner ...
+$ hadoop jar target/dkpro-hadoop-XXX.jar org.dkpro.bigdata.hadoop.XMLDescriptorRunner ...
 ----
 
 ### Caveats

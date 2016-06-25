@@ -11,8 +11,4 @@ testinput
 testoutput
 
 .idea
-de.tudarmstadt.ukp.dkpro.bigdata.collocations/de.tudarmstadt.ukp.dkpro.bigdata.collocations.iml
-de.tudarmstadt.ukp.dkpro.bigdata.examples/de.tudarmstadt.ukp.dkpro.bigdata.examples.iml
-de.tudarmstadt.ukp.dkpro.bigdata.hadoop/de.tudarmstadt.ukp.dkpro.bigdata.hadoop.iml
-de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop/de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop.iml
-de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop/build
+*.iml

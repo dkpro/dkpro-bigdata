@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.dkpro.bigdata</groupId>
     <artifactId>dkpro-bigdata</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
   </parent>
   <artifactId>dkpro-bigdata-collocations</artifactId>
   <name>DKPro BigData - Collocations</name>

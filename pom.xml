@@ -72,7 +72,7 @@
     <hadoop.version>2.7.1</hadoop.version>
     <uima.version>2.8.1</uima.version>
     <uimafit.version>2.2.0</uimafit.version>
-    <dkpro.core.version>1.7.0</dkpro.core.version>
+    <dkpro.core.version>1.8.0</dkpro.core.version>
   </properties>
   <packaging>pom</packaging>
   <modules>

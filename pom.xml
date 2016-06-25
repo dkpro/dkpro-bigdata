@@ -23,8 +23,8 @@
     <artifactId>dkpro-parent-pom</artifactId>
     <version>14</version>
   </parent>
-  <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-  <artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
+  <groupId>org.dkpro</groupId>
+  <artifactId>dkpro-bigdata</artifactId>
   <version>0.1.1-SNAPSHOT</version>
   <name>DKPro BigData</name>
   <url>http://dkpro.github.io/dkpro-bigdata/</url>
@@ -44,16 +44,6 @@
     </repository>
   </repositories>
   -->
-  <!-- <distributionManagement>
-    <repository>
-    <id>ukp-oss</id>
-    <url>dav:https://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-ukp-releases-local</url>
-    </repository>
-    <snapshotRepository>
-    <id>ukp-oss</id>
-    <url>dav:https://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-ukp-snapshots-local</url>
-    </snapshotRepository>
-    </distributionManagement> -->
   <organization>
     <name>Ubiquitous Knowledge Processing (UKP) Lab, Technische Universität Darmstadt</name>
     <url>https://www.ukp.tu-darmstadt.de/</url>
@@ -76,11 +66,11 @@
   </properties>
   <packaging>pom</packaging>
   <modules>
-    <module>de.tudarmstadt.ukp.dkpro.bigdata.collocations</module>
-    <module>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</module>
-    <module>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</module>
-    <module>de.tudarmstadt.ukp.dkpro.bigdata.examples</module>
-    <module>de.tudarmstadt.ukp.dkpro.bigdata.doc</module>
+    <module>dkpro-bigdata-collocations</module>
+    <module>dkpro-bigdata-hadoop</module>
+    <module>dkpro-bigdata-io-hadoop</module>
+    <module>dkpro-bigdata-examples</module>
+    <module>dkpro-bigdata-doc</module>
   </modules>
   <dependencyManagement>
     <dependencies>

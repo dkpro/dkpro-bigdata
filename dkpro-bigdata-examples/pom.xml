@@ -2,162 +2,143 @@
   Copyright 2011
   Ubiquitous Knowledge Processing (UKP) Lab
   Technische Universität Darmstadt
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
-    http://www.apache.org/licenses/LICENSE-2.0
-  
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-		<artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
-		<version>0.1.1-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
-	<artifactId>de.tudarmstadt.ukp.dkpro.bigdata.examples</artifactId>
-	<name>DKPro BigData - Examples</name>
-	<description>Examples pipelines to run on the cluster</description>
-	<dependencies>
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-			<artifactId>
-				de.tudarmstadt.ukp.dkpro.bigdata.hadoop
-			</artifactId>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.dkpro.bigdata</groupId>
+    <artifactId>dkpro-bigdata</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>dkpro-bigdata-examples</artifactId>
+  <name>DKPro BigData - Examples</name>
+  <description>Examples pipelines to run on the cluster</description>
+  <dependencies>
+    <dependency>
+      <groupId>org.dkpro.bigdata</groupId>
+      <artifactId>dkpro-bigdata-hadoop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.dkpro.bigdata</groupId>
+      <artifactId>dkpro-bigdata-io-hadoop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.core.io.text-asl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.core.api.segmentation-asl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.core.dictionaryannotator-asl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.core.tokit-asl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+      <artifactId>de.tudarmstadt.ukp.dkpro.core.snowball-asl</artifactId>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+              <overWriteIfNewer>true</overWriteIfNewer>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
 
-		</dependency>
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-			<artifactId>
-				de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop
-			</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>.gitignore</exclude>
+            <exclude>pom.xml</exclude>
+            <!-- maven config files -->
+            <exclude>src/filter/**/*</exclude>
+            <!-- release generated artifact -->
+            <exclude>release.properties</exclude>
+            <exclude>CHANGES</exclude>
+            <exclude>LICENCE.txt</exclude>
+            <exclude>MANIFEST.MF</exclude>
+            <exclude>NOTICE.txt</exclude>
+            <exclude>README.txt</exclude>
+            <exclude>src/main/resources/**/*</exclude>
+            <exclude>src/test/resources/**/*</exclude>
+            <!-- generated JCas wrappers -->
+            <exclude>src/main/java/**/type/**/*</exclude>
+          </excludes>
+        </configuration>
 
-		</dependency>
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>
-				de.tudarmstadt.ukp.dkpro.core.io.text-asl
-			</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>
-				de.tudarmstadt.ukp.dkpro.core.api.segmentation-asl
-			</artifactId>
+      </plugin>
 
-		</dependency>
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>
-				de.tudarmstadt.ukp.dkpro.core.dictionaryannotator-asl
-			</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>
-				de.tudarmstadt.ukp.dkpro.core.tokit-asl
-			</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
-			<artifactId>
-				de.tudarmstadt.ukp.dkpro.core.snowball-asl
-			</artifactId>
-		</dependency>
-	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/lib</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>false</overWriteSnapshots>
-							<overWriteIfNewer>true</overWriteIfNewer>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.rat</groupId>
-				<artifactId>apache-rat-plugin</artifactId>
-
-				<configuration>
-					<excludes>
-						<exclude>.gitignore</exclude>
-						<exclude>pom.xml</exclude>
-						<!-- maven config files -->
-						<exclude>src/filter/**/*</exclude>
-						<!-- release generated artifact -->
-						<exclude>release.properties</exclude>
-						<exclude>CHANGES</exclude>
-						<exclude>LICENCE.txt</exclude>
-						<exclude>MANIFEST.MF</exclude>
-						<exclude>NOTICE.txt</exclude>
-						<exclude>README.txt</exclude>
-						<exclude>src/main/resources/**/*</exclude>
-						<exclude>src/test/resources/**/*</exclude>
-						<!-- generated JCas wrappers -->
-						<exclude>src/main/java/**/type/**/*</exclude>
-					</excludes>
-				</configuration>
-
-			</plugin>
-
-		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-dependency-plugin
-										</artifactId>
-										<versionRange>
-											[2.5.1,)
-										</versionRange>
-										<goals>
-											<goal>copy-dependencies</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore/>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence 
+          on the Maven build itself. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>
+                      org.apache.maven.plugins
+                    </groupId>
+                    <artifactId>
+                      maven-dependency-plugin
+                    </artifactId>
+                    <versionRange>
+                      [2.5.1,)
+                    </versionRange>
+                    <goals>
+                      <goal>copy-dependencies</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>

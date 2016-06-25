@@ -23,7 +23,7 @@
     <artifactId>dkpro-parent-pom</artifactId>
     <version>14</version>
   </parent>
-  <groupId>org.dkpro</groupId>
+  <groupId>org.dkpro.bigdata</groupId>
   <artifactId>dkpro-bigdata</artifactId>
   <version>0.1.1-SNAPSHOT</version>
   <name>DKPro BigData</name>
@@ -75,28 +75,28 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-        <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.collocations</artifactId>
+        <groupId>org.dkpro.bigdata</groupId>
+        <artifactId>dkpro-bigdata-collocations</artifactId>
         <version>0.1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-        <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
+        <groupId>org.dkpro.bigdata</groupId>
+        <artifactId>dkpro-bigdata-hadoop</artifactId>
         <version>0.1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-        <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
+        <groupId>org.dkpro.bigdata</groupId>
+        <artifactId>dkpro-bigdata-io-hadoop</artifactId>
         <version>0.1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-        <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.examples</artifactId>
+        <groupId>org.dkpro.bigdata</groupId>
+        <artifactId>dkpro-bigdata-examples</artifactId>
         <version>0.1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-        <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.doc</artifactId>
+        <groupId>org.dkpro.bigdata</groupId>
+        <artifactId>dkpro-bigdata-doc</artifactId>
         <version>0.1.1-SNAPSHOT</version>
       </dependency>
       <dependency>

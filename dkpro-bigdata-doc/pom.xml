@@ -19,12 +19,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-    <artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
+    <groupId>org.dkpro.bigdata</groupId>
+    <artifactId>dkpro-bigdata</artifactId>
     <version>0.1.1-SNAPSHOT</version>
   </parent>
-  <groupId>de.tudarmstadt.ukp.dkpro.bigdata.doc</groupId>
-  <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.doc</artifactId>
+  <artifactId>dkpro-bigdata-doc</artifactId>
   <name>DKPro BigData - Documentation</name>
   <build>
     <plugins>

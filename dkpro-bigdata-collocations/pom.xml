@@ -19,22 +19,21 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-    <artifactId>de.tudarmstadt.ukp.dkpro.bigdata</artifactId>
+    <groupId>org.dkpro.bigdata</groupId>
+    <artifactId>dkpro-bigdata</artifactId>
     <version>0.1.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.collocations</artifactId>
+  <artifactId>dkpro-bigdata-collocations</artifactId>
   <name>DKPro BigData - Collocations</name>
   <description>Compute collocations on the cluster</description>
   <dependencies>
     <dependency>
-      <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-      <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.hadoop</artifactId>
+      <groupId>org.dkpro.bigdata</groupId>
+      <artifactId>dkpro-bigdata-hadoop</artifactId>
     </dependency>
     <dependency>
-      <groupId>de.tudarmstadt.ukp.dkpro.bigdata</groupId>
-      <artifactId>de.tudarmstadt.ukp.dkpro.bigdata.io.hadoop</artifactId>
+      <groupId>org.dkpro.bigdata</groupId>
+      <artifactId>dkpro-bigdata-io-hadoop</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>

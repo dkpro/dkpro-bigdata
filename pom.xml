@@ -147,6 +147,10 @@
             <artifactId>jmxtools</artifactId>
             <groupId>com.sun.jdmk</groupId>
           </exclusion>
+          <exclusion>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>

@@ -5,7 +5,7 @@
 # this work, you have to use › layout: frontpage
 #
 layout: frontpage
-title: "DKPro BigData"
+title: "Welcome"
 ---
 
 DKPro BigData enables the easy execution of UIMA-based natural language processing pipelines on a hadoop cluster.
